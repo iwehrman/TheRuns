@@ -1,0 +1,77 @@
+{% extends "run/base_14.html" %}
+
+{% block title %} Track/Run: Profile {% endblock title %}
+
+{% block section-profile %}class="active"{%endblock%}
+
+{% block header %} 
+	Howdy, {{ user.username }}!
+{% endblock header %}
+
+{% block main_14 %}
+	<div class="row">
+		<div class="span4">
+			<h2>Runs:</h2>
+		</div>
+		<div class="span6 offset4">
+			<ul class="breadcrumb pull-right">
+				<li class="active">Recent</li> <span class="divider">/</span>
+				<li><a href="/run/all">All</a></li> <span class="divider">/</span>
+				<li><a href="/run/new">Add</a></li> 
+			</ul>
+		</div>
+	</div>
+	{% include "run/run_table.html" with runlist=runs only %}
+			
+	<div class="row">
+		<div class="span4">
+			<h2>Shoes:</h2>
+		</div>
+		<div class="span6 offset4">
+			<ul class="breadcrumb pull-right">
+				<li class="active">Recent</li> <span class="divider">/</span>
+				<li><a href="/shoe/all">All</a></li> <span class="divider">/</span>
+				<li><a href="/shoe/new">Add</a></li> 
+			</ul>
+		</div>
+	</div>
+	{% include "run/shoe_table.html" with shoelist=shoes only %}
+		
+	<h2>Profile:</h2>
+	<div class="row">
+		<div class="span5">
+			<dl>
+				<dt>User name</dt>
+				<dd>{{ user.username }}</dd>
+				<dt>Real name</dt>
+				<dd>{{ user.first_name }} {{ user.last_name }}</dd>
+				<dt>Email</dt>
+				<dd>{{ user.email }}</dd>
+			</dl>
+		</div>
+		<div class="span4 offset9">
+			<dl>
+				<dt>Gender</dt>
+				<dd>{{ profile.gender|yesno:"Male,Female,Neither" }}</dd>
+				<dt>Weight</dt>
+				<dd>{{ profile.weight }} lbs</dd>
+				<dt>Age</dt>
+				<dd>{{ profile.age_in_years }}</dd>
+			</dl>
+		</div>
+		<div class="span4 offset12">
+			<dl>
+				<dt>Resting Heart Rate</dt>
+				<dd>{{ profile.resting_heart_rate }} bpm</dd>
+				<dt>Maximum Heart Rate</dt>
+				<dd>{{ profile.maximum_heart_rate|floatformat:0 }} bpm </dd>
+				<dt>vO<sub>2</sub>max</dt>
+				<dd>{{ profile.vO2max|floatformat:0 }}</dd>
+			</dl>
+		</div>
+	</div>
+	<!-- a href="/profile/update">Update profile.</a-->
+	
+
+
+{% endblock main_14 %}

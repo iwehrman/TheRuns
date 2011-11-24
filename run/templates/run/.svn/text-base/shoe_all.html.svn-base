@@ -1,0 +1,31 @@
+{% extends "run/base_14.html" %}
+
+{% block title %} Track/Run: All Shoes {% endblock title %}
+
+{% block section-profile %}class="active"{%endblock%}
+
+{% block header %} 
+	Howdy, {{ user.username }}!
+{% endblock header %}
+
+{% block main_14 %}
+
+	<div class="row">
+		<div class="span4">
+			<h2>Shoes:</h2>
+		</div>
+		<div class="span6 offset4">
+			<ul class="breadcrumb pull-right">
+				<li><a href="/profile/">Recent</a></li> <span class="divider">/</span>
+				<li class="active">All</li> <span class="divider">/</span>
+				<li><a href="/shoe/new">Add</a></li> 
+			</ul>
+		</div>
+	</div>
+	{% include "run/shoe_table.html" with shoelist=shoes.object_list only %}
+	
+{% endblock main_14 %}
+
+{% block pagination %}
+{% include "run/pager.html" with page=shoes only %}
+{% endblock pagination %}

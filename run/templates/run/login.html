@@ -1,0 +1,51 @@
+{% extends "run/base_14.html" %}
+
+{% block title %} Track/Run: Login {% endblock title %}
+
+{% block init %}
+<script type="text/javascript"> 
+	$(document).ready( function(){
+	$('input[tabindex=1]').focus();
+	});
+</script>
+{% endblock init %}
+{% block header %} Login  {% endblock header %}
+
+{% block login-menu %}{% endblock login-menu %}
+
+{% block main_14 %}
+
+	<form action="/login/" method="post">
+	{% csrf_token %}
+	<fieldset>
+	<legend> You must be logged in: </legend>
+
+	<div class="clearfix">
+		<label for="username">Username</label>
+		<div class="input">
+			<input tabindex="1" type="text" name="username" id="username" 
+				class="input-large">
+		</div>
+	</div>	
+
+	<div class="clearfix">
+		<label for="password">Password</label>
+		<div class="input">
+			<input tabindex="2" type="password" name="password" id="password" 
+				class="input-large">
+		</div>
+	</div>
+	
+
+	<div class="clearfix">
+		<div class="input">
+			<input type="hidden" name="destination" value="{{destination}}">
+			<button tabindex="3" name = "login" class="btn primary">Log in</button>
+			<!-- button name = "signup" class="btn info">... or sign up</button-->
+		</div>
+	</div>
+
+	</fieldset>
+	</form>
+
+{% endblock main_14 %}

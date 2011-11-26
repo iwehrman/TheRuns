@@ -539,7 +539,7 @@ def shoe_update(request):
     shoe.make = post['make']
     shoe.model = post['model']
     try:
-        shoe.miles = float(post['miles'])
+        shoe.miles = post['miles']
     except ValueError:
         return render_to_response('run/profile.html', 
             {'error_message': 'Bad miles.'}, 

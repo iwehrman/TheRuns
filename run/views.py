@@ -437,7 +437,7 @@ def run_update(request):
     
     try:
         if (post['distance']):
-            run.distance = float(post['distance'])
+            run.distance = post['distance']
         else: 
             return render_to_response('run/profile.html', 
                 {'profile': profile, 'error_message': 'Distance must be set.'}, 

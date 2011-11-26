@@ -28,14 +28,14 @@
 	<div class="clearfix">
 		<label for="id_model">Model</label>
 		<div class="input">
-			<input type="text" name="model" id="id_model" class="large">
+			<input type="text" name="model" id="id_model" class="large" tabindex="2">
 		</div>
 	</div>
 
 	<div class="clearfix">
 		<label for="id_miles">Current Mileage</label>
 		<div class="input">
-			<input type="text" name="miles" id="id_miles" class="mini">
+			<input type="text" name="miles" id="id_miles" class="mini" tabindex="3">
 		</div>
 	</div>
 
@@ -43,7 +43,7 @@
 		<div class="input">
 			{% csrf_token %}
 			<input type="hidden" name="user" value="{{ user.id }}" />
-			<input type="submit" class="btn primary" value="Add Shoe" />
+			<input type="submit" class="btn primary" value="Add Shoe" tabindex="4"/>
 		</div>
 	</div>
 

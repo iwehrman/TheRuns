@@ -36,8 +36,11 @@ class UserProfile(models.Model):
         return 205.8 - (0.685 * float(self.age_in_years()))
 
     def age_in_years(self): 
-        return int((date.today() - self.birthday).total_seconds() // 
-            (3600 * 24 * 365))
+        td = date.today() - self.birthday
+        total_seconds = td.seconds + (3600 * 24 * td.days)
+        seconds_in_year = 3600 * 24 * 365
+        return int(total_seconds // seconds_in_year)
+            
 
     def weight_in_kg(self):
         return Decimal(self.weight) * kg_per_pound

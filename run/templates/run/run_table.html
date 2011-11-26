@@ -9,7 +9,7 @@
 			<th>HR</th>
 			<th>Energy</th>
 			<th>Eff.</th>
-			<th><!--a href="/run/new/">Add run</a-->&nbsp;</th>
+			<th><i>Clear</i></th>
 		</tr>
 	</thead>
 {% for run in runlist %}
@@ -21,7 +21,7 @@
 		<td>{{ run.average_heart_rate }} / {{run.heart_rate_percent|floatformat:0}}%</td>
 		<td>{{ run.calories|floatformat:0 }}</td>
 		<td>{{ run.efficiency|floatformat:3 }}</td>
-		<td><a href="/run/remove/{{run.id}}">Remove</a></td>
+		<td><a href="/run/remove/{{run.id}}">Clear</a></td>
 	</tr>
 {% endfor %}
 </table>

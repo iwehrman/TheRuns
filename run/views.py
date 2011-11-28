@@ -120,12 +120,13 @@ def index_last_modified_user(request, user):
     else:
         lm = datetime.datetime.now()
         last_modified_cache[userid] = lm
-        
-    ll = request.user.last_login
-    if ll > lm: 
-        return ll
-    else: 
-        return lm
+      
+  
+    # ll = request.user.last_login
+    # if ll > lm: 
+    #    return ll
+
+    return lm
 
 def index_last_modified_username(request, username):
     user = User.objects.get(username=username)
@@ -301,7 +302,7 @@ def export(request):
                 acc.append(serialize_run(run))
             return acc
             
-        return HttpResponse(json.dumps(serialize_all_runs(Run.objects.all())),
+        return HttpResponse(json.dumps(serialize_all_runs(Run.objects.filter(user=user.id).order_by('-date'))),
             mimetype="application/json")
     
 

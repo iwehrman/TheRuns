@@ -107,18 +107,27 @@ def get_week_aggregate(user, first_date, last_date):
 def get_month_aggregate(user, first_date, last_date):
         return get_aggregate_generic(month_cache, user, first_date, last_date) 
 
+
 def index_last_modified_user(request, user): 
+    """
+    Last modification time for the index page is the max of 
+    the last modification time for the user whose page we're loading 
+    and the last login time for the user performing the request.
+    """ 
     userid = user.id
     if userid in last_modified_cache:
         lm = last_modified_cache[userid]
     else:
         lm = datetime.datetime.now()
         last_modified_cache[userid] = lm
-    print "Last modified: %s" % lm
-    return lm
+        
+    ll = request.user.last_login
+    if ll > lm: 
+        return ll
+    else: 
+        return lm
 
 def index_last_modified_username(request, username):
-    print username
     user = User.objects.get(username=username)
     return index_last_modified_user(request, user)
     
@@ -174,7 +183,7 @@ def __index_generic(request, user):
         ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
         all_months.append(ag)
         
-    print "Duration: %s" % (datetime.datetime.now() - start)
+    # print "Duration: %s" % (datetime.datetime.now() - start)
         
     context = {'this_week': all_weeks[0],
         'last_week': all_weeks[1], 

@@ -164,16 +164,19 @@ class Run(models.Model):
         
         hr = self.average_heart_rate
         gender = profile.gender
-        weight = profile.weight_in_kg()
+        weight_in_lbs = profile.weight
+        weight_in_kg = profile.weight_in_kg()
         age = profile.age_in_years()
         
-        if (hr and (gender is not None) and weight and age): 
+        if hr and (gender is not None) and weight_in_kg and age: 
             if profile.resting_heart_rate:
                 vO2max = profile.vO2max()
-                rate = Run.compute_calories_per_sec(hr, gender, weight, age, vO2max)
+                rate = Run.compute_calories_per_sec(hr, gender, weight_in_kg, age, vO2max)
             else: 
-                rate = Run.compute_calories_per_sec(hr, gender, weight, age)
+                rate = Run.compute_calories_per_sec(hr, gender, weight_in_kg, age)
             self.calories = int(rate * self.duration_in_seconds())
+        elif (not hr) and weight_in_lbs: 
+            self.calories = weight_in_lbs * int(0.75 * float(self.distance))
         else: 
             self.calories = 0
 

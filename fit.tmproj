@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>run/views.py</string>
+	<string>run/templates/run/index.html</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -50,30 +50,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>28</integer>
+				<integer>20</integer>
 				<key>line</key>
-				<integer>41</integer>
+				<integer>123</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>19</integer>
-				<key>line</key>
-				<integer>41</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>28</integer>
-				<key>line</key>
-				<integer>41</integer>
-			</dict>
+			<integer>85</integer>
 		</dict>
 		<key>run/templates/500.html</key>
 		<dict>
@@ -89,19 +73,33 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
+		<key>run/templates/run/base.html</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>78</integer>
+				<key>line</key>
+				<integer>92</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>72</integer>
+		</dict>
 		<key>run/templates/run/index.html</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>36</integer>
+				<integer>2</integer>
 				<key>line</key>
-				<integer>53</integer>
+				<integer>45</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>32</integer>
+			<integer>0</integer>
 		</dict>
 		<key>run/templates/run/profile.html</key>
 		<dict>
@@ -117,6 +115,20 @@
 			<key>firstVisibleLine</key>
 			<integer>24</integer>
 		</dict>
+		<key>run/templates/run/run_table.html</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>10</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>run/templates/run/shoe_edit.html</key>
 		<dict>
 			<key>caret</key>
@@ -130,6 +142,20 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>5</integer>
+		</dict>
+		<key>run/templates/run/shoe_table.html</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>37</integer>
+				<key>line</key>
+				<integer>13</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>run/urls.py</key>
 		<dict>
@@ -150,14 +176,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>43</integer>
+				<integer>32</integer>
 				<key>line</key>
-				<integer>439</integer>
+				<integer>27</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>409</integer>
+			<integer>12</integer>
 		</dict>
 		<key>settings.py</key>
 		<dict>
@@ -184,6 +210,9 @@
 		<string>run/templates/run/shoe_edit.html</string>
 		<string>run/templates/500.html</string>
 		<string>run/models.py</string>
+		<string>run/templates/run/base.html</string>
+		<string>run/templates/run/run_table.html</string>
+		<string>run/templates/run/shoe_table.html</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>

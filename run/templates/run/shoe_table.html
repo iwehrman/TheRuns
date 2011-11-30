@@ -2,7 +2,7 @@
 	<thead>
 		<tr>
 			<th>Make / Model</th>
-			<th>Distance (mi)</th>
+			<th>Distance</th>
 			<th>Active?</th>
 			<th><i>Retire</i>&nbsp;</th>
 			<th><i>Clear</i>&nbsp;</th>
@@ -11,7 +11,7 @@
 {% for shoe in shoelist %}
 	<tr>
     	<td><a href="/shoe/{{ shoe.id }}/"></a>{{ shoe.make }} {{ shoe.model }}</td>
-		<td>{{shoe.miles|floatformat:0}}</td>
+		<td>{{shoe.miles|floatformat:0}} mi</td>
 		<td>{{shoe.active|yesno:"Yes,No"}}</td>
 		<td><a href="/shoe/retire/{{shoe.id}}">Retire</a></td>
 		<td><a href="/shoe/remove/{{shoe.id}}">Clear</a></td>

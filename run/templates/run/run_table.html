@@ -6,27 +6,27 @@
 			<th>Distance</th>
 			<th>Duration</th>
 			<th>Pace</th>
-			<th>HR</th>
+			<th>HR / %</th>
 			<th>Energy</th>
-			<th>Eff.</th>
+			<th>Productivity</th>
 			<th><i>Clear</i></th>
 		</tr>
 	</thead>
 {% for run in runlist %}
 	<tr>
 		<td>{{ run.date|naturalday|capfirst }}</td>
-		<td>{{ run.distance|floatformat:2 }}</td>
+		<td>{{ run.distance|floatformat:2 }} mi</td>
 		<td>{{ run.duration_as_string }}</td>
 		<td>{{ run.pace }}</td>
 		<td>{% if run.average_heart_rate %} 
 			{{ run.average_heart_rate }} / 
-			{{run.heart_rate_percent|floatformat:0}}
+			{{run.heart_rate_percent|floatformat:0}}%
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>
-		<td>{{ run.calories|floatformat:0 }}</td>
+		<td>{{ run.calories|floatformat:0 }} kcal</td>
 		<td>{% if run.average_heart_rate %} 
-			{{ run.efficiency|floatformat:3 }}
+			{{ run.efficiency|floatformat:3 }} m/b
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>

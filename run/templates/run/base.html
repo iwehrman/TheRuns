@@ -5,6 +5,8 @@
 	<link rel="stylesheet/less" type="text/css" href="{{STATIC_URL}}bootstrap/lib/bootstrap.less">
 	<script src="{{ STATIC_URL }}less.js" type="text/javascript"></script>
 	--> 
+	<script type="text/javascript" src="http://use.typekit.com/dtb3tdq.js"></script>
+	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}bootstrap/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 	<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-alerts.js"></script>
@@ -76,12 +78,12 @@
 	<title>{% block title %}Generic title{% endblock title %}</title>
 
   </head>
-<body>
+<body class="tk-museo-sans">
 	
 	<div class="topbar" data-dropdown="dropdown">
 		<div class="topbar-inner">
 			<div class="container-fluid">
-				<a class="brand" href="/">The Runs</a>
+				<a class="brand tk-chippewa-falls" href="/">The Runs</a>
 				<ul class="nav">
 					<li {% block section-home %}{%endblock%}><a href="/" accesskey="h">Home</a></li>
 					<li {% block section-profile %}{%endblock%}><a href="/profile" accesskey="p">Profile</a></li>

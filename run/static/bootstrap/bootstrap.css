@@ -6,7 +6,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Designed and built with all the love in the world @twitter by @mdo and @fat.
- * Date: Wed Nov  2 16:35:03 CDT 2011
+ * Date: Thu Dec  1 15:26:21 CST 2011
  */
 /* Reset.less
  * Props to Eric Meyer (meyerweb.com) for his CSS reset file. We're using an adapted version here	that cuts out some of the reset HTML elements we will never need here (i.e., dfn, samp, etc).
@@ -1260,7 +1260,7 @@ table .headerSortUp.purple, table .headerSortDown.purple {
   padding: 8px 20px 12px;
   margin-left: -20px;
   color: #ffffff;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 200;
   line-height: 1;
 }

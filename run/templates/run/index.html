@@ -29,7 +29,7 @@
 			},
 			vAxes:{
 				0:{
-					title:'Productivity & Speed',
+					title:'Yield & Speed',
 					textStyle:{color: 'grey'}, 
 					logScale: true, 
 					baselineColor: '#93a1a1',
@@ -47,7 +47,7 @@
 	
 	function drawWeeks() {
 		var rowData = [
-			['Week','Distance','Productivity (m/b)', 'Speed (m/s)'],
+			['Week','Distance','Yield (m/b)', 'Speed (m/s)'],
 		{% for week in all_weeks reversed %}
 			['{{week.first_date|date:"n/j"}}', 
 			  {{week.distance}}, 
@@ -61,7 +61,7 @@
 	
 	function drawMonths() {
 		var rowData = [
-			['Month','Distance (mi)','Productivity (m/b)', 'Speed (m/s)'],
+			['Month','Distance (mi)','Yield (m/b)', 'Speed (m/s)'],
 		{% for month in all_months reversed %}
 			['{{month.first_date|date:"n/y"}}', 
 			  {{month.distance}}, 

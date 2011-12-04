@@ -1,7 +1,8 @@
 <table>
 	<thead>
 		<tr>
-			<th>Make / Model</th>
+			<th>Make</th>
+			<th>Model</th>
 			<th>Distance</th>
 			<th>Active?</th>
 			<th><i>Retire</i>&nbsp;</th>
@@ -10,7 +11,8 @@
 	</thead>
 {% for shoe in shoelist %}
 	<tr>
-    	<td><a href="/shoe/{{ shoe.id }}/"></a>{{ shoe.make }} {{ shoe.model }}</td>
+    	<td>{{ shoe.make }}</td>
+		<td>{{ shoe.model }}</td>
 		<td>{{shoe.miles|floatformat:0}} mi</td>
 		<td>{{shoe.active|yesno:"Yes,No"}}</td>
 		<td><a href="/shoe/retire/{{shoe.id}}">Retire</a></td>

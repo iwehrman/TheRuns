@@ -121,10 +121,10 @@ def index_last_modified_user(request, user):
         lm = datetime.datetime.now()
         last_modified_cache[userid] = lm
       
-  
-    # ll = request.user.last_login
-    # if ll > lm: 
-    #    return ll
+    if request.user.is_authenticated():
+        ll = request.user.last_login
+        if ll > lm: 
+           return ll
 
     return lm
 

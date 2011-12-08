@@ -225,12 +225,8 @@ def __index_generic(request, user):
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_username)
 def index_user(request, username):
-    user = request.user
-    if not user.is_authenticated(): 
-        return redirect_to_login(request)
-    else: 
-        user = User.objects.get(username=username)
-        return __index_generic(request, user)
+    user = User.objects.get(username=username)
+    return __index_generic(request, user)
 
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_default)

@@ -91,6 +91,7 @@
 				</ul>
 				{% block login-menu %}
 				<ul class="nav secondary-nav">
+					{% if user.is_authenticated %}
 					<li class="dropdown"> 
 						<a href="/profile/" class="dropdown-toggle">Logged in: {{user.username}}</a>
 						<ul class="dropdown-menu">
@@ -101,6 +102,9 @@
 							<li><a href="/logout">Logout</a></li>
 						</ul>
 					</li>
+					{% else %}
+					<a href="/login">Log in...</a>
+					{% endif %}
 				</ul>
 				{% endblock login-menu %}
 			</div>

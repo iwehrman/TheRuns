@@ -8,7 +8,7 @@
 </script>
 {% endblock init %}
 
-{% block title %} Track/Run: Edit Profile {% endblock title %}
+{% block title %} The Runs: Update Profile {% endblock title %}
 
 {% block section-profile %}class="active"{%endblock%}
 
@@ -48,7 +48,7 @@
 		<div class="input">
 			{% csrf_token %}
 			<input type="hidden" name="user" value="{{ user.id }}" />
-			<input type="submit" class="btn primary" value="Update Profile" />
+			<input type="submit" class="btn primary" value="Update Profile" tabindex="10"/>
 		</div>
 	</div>
 

@@ -176,7 +176,7 @@ class Run(models.Model):
                 rate = Run.compute_calories_per_sec(hr, gender, weight_in_kg, age)
             self.calories = int(rate * self.duration_in_seconds())
         elif (not hr) and weight_in_lbs: 
-            self.calories = weight_in_lbs * int(0.75 * float(self.distance))
+            self.calories = int(float(weight_in_lbs) * 0.75 * float(self.distance))
         else: 
             self.calories = 0
 

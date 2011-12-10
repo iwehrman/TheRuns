@@ -93,7 +93,7 @@
 				<ul class="nav secondary-nav">
 					{% if user.is_authenticated %}
 					<li class="dropdown"> 
-						<a href="/profile/" class="dropdown-toggle">Logged in: {{user.username}}</a>
+						<a href="/u/{{user.username}}" class="dropdown-toggle">Logged in: {{user.username}}</a>
 						<ul class="dropdown-menu">
 							<li><a href="/profile/update">Account Settings</a></li>
 							<li><a href="/import">Import...</a></li>

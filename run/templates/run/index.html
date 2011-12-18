@@ -60,7 +60,7 @@
 		{% endfor %}
 			]
 			
-		drawVis(rowData, 'visualization-weeks', false);
+		drawVis(rowData, 'visualization-weeks', true);
 	}
 	
 	function drawMonths() {
@@ -76,7 +76,7 @@
 		{% endfor %}
 			]
 		
-		drawVis(rowData, 'visualization-months', false);
+		drawVis(rowData, 'visualization-months', true);
 	}
 
 	google.setOnLoadCallback(drawWeeks);

@@ -111,9 +111,13 @@ def get_month_aggregate(user, first_date, last_date):
 def index_last_modified_user(request, user): 
     """
     Last modification time for the index page is the max of 
-    the last modification time for the user whose page we're loading 
-    and the last login time for the user performing the request.
+    1) the last modification time for the user whose page we're loading, 
+    2) the last login time for the user performing the request, and 
+    3) this morning at 12am (to make sure humanized dates like "today" make sense). 
     """ 
+    
+    this_morning = datetime.datetime.now().replace(hour=0,minute=0,second=0)
+    
     userid = user.id
     if userid in last_modified_cache:
         lm = last_modified_cache[userid]
@@ -124,9 +128,9 @@ def index_last_modified_user(request, user):
     if request.user.is_authenticated():
         ll = request.user.last_login
         if ll > lm: 
-           return ll
+           return max(this_morning, ll)
 
-    return lm
+    return max(this_morning, lm)
 
 def index_last_modified_username(request, username):
     user = User.objects.get(username=username)

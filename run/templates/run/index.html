@@ -7,7 +7,7 @@
 </script>
 <script type="text/javascript">
     
-	function drawVis(rowData, elem) {
+	function drawVis(rowData, elem, log) {
 		// Create and populate the data table.
         var data = google.visualization.arrayToDataTable(rowData);
 
@@ -18,14 +18,15 @@
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 820,
-			height: 340,
+			height: 350,
 			curveType: 'function',
 			hAxis: {
 				textStyle: {color: 'grey', fontName:'sans-serif', fontSize:12}},
 			series: {
-				0: {type: "bars", targetAxisIndex: 1, color: '#93a1a1'}, 
-				1: {type: "line", targetAxisIndex: 0, color: '#d33682'},
-				2: {type: "line", targetAxisIndex: 0, color: '#2aa198'}
+				0: {type: "line", targetAxisIndex: 0, color: '#d33682', lineWidth: 3},
+				1: {type: "line", targetAxisIndex: 0, color: '#2aa198', lineWidth: 3},
+				2: {type: "bars", targetAxisIndex: 1, color: '#93a1a1'}, 
+				3: {type: "bars", targetAxisIndex: 1, color: '#ccc'}, 
 			},
 			vAxes:{
 				0:{
@@ -37,6 +38,7 @@
 					// 					viewWindow: {min: 0.85, max: 2.6}
 				},
 				1:{	
+					logScale: log,
 					title:'Distance',
 					textStyle:{color: 'grey'}, 
 				}
@@ -47,30 +49,34 @@
 	
 	function drawWeeks() {
 		var rowData = [
-			['Week','Distance','Yield (m/b)', 'Speed (m/s)'],
+			['Week','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
 		{% for week in all_weeks reversed %}
 			['{{week.first_date|date:"n/j"}}', 
-			  {{week.distance}}, 
 			  {{week.efficiency|floatformat:3}}, 
-			  {{week.speed|floatformat:3}}],
+			  {{week.speed|floatformat:3}},
+			  {{week.distance}},
+	  		  {{week.average|floatformat:1}},
+			],
 		{% endfor %}
 			]
 			
-		drawVis(rowData, 'visualization-weeks')
+		drawVis(rowData, 'visualization-weeks', false);
 	}
 	
 	function drawMonths() {
 		var rowData = [
-			['Month','Distance (mi)','Yield (m/b)', 'Speed (m/s)'],
+			['Month','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
 		{% for month in all_months reversed %}
 			['{{month.first_date|date:"n/y"}}', 
-			  {{month.distance}}, 
 			  {{month.efficiency|floatformat:3}}, 
-			  {{month.speed|floatformat:3}}],
+			  {{month.speed|floatformat:3}},
+			  {{month.distance}},
+     	      {{month.average|floatformat:1}},
+			],
 		{% endfor %}
 			]
 		
-		drawVis(rowData, 'visualization-months')
+		drawVis(rowData, 'visualization-months', false);
 	}
 
 	google.setOnLoadCallback(drawWeeks);
@@ -104,7 +110,7 @@
 	{% endif %}
 </p>
 
-<div id="visualization-weeks" style="width: 820px; height: 340px;"></div>
+<div id="visualization-weeks" style="width: 820px; height: 350px;"></div>
 
 <p style="font-size: 20px; text-align: center;">
 	{% if this_month.distance %}
@@ -126,6 +132,6 @@
 	{% endif %}
 </p>
 		
-<div id="visualization-months" style="width: 820px; height: 340px;"></div>
+<div id="visualization-months" style="width: 820px; height: 350px;"></div>
 		
 {% endblock main_14 %}

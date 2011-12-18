@@ -46,10 +46,16 @@ def aggregate_runs(user, first_day, last_day):
         speed = total_distance_in_meters / duration
     else:
         speed = 0
+    
+    if len(runs) > 0: 
+        average = distance / len(runs)
+    else: 
+        average = 0
         
     ag = Aggregate()
     ag.user = user
     ag.distance = distance
+    ag.average = average
     ag.pace = Run.compute_pace(duration, distance)
     ag.efficiency = Run.compute_efficiency(hr_distance_in_meters, heartbeats)
     ag.speed = speed

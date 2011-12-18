@@ -278,7 +278,7 @@ def do_permission_denied(request):
 
 def redirect_to_login(request, destination=None):
     if not destination: 
-        destination = request.build_absolute_uri()
+        destination = request.get_full_path()
     params = urlencode({'destination': destination})
     return HttpResponseRedirect(reverse('run.views.do_login') + 
         '?%s' % params)

@@ -7,12 +7,21 @@
 </script>
 <script type="text/javascript">
     
-	function drawVis(rowData, elem, log) {
+	function drawVis(rows, domain) {
 		// Create and populate the data table.
-        var data = google.visualization.arrayToDataTable(rowData);
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', domain); 
+		data.addColumn('number', 'Yield (m/b)'); 
+		data.addColumn('number', 'Speed (m/s)'); 
+		data.addColumn({type:'string', role:'tooltip'}); // annotation role col.
+		data.addColumn('number', 'Total Distance (mi)'); 
+		data.addColumn('number', 'Avg. Distance (mi)'); 
+		data.addRows(rows);
+
 
         // Create and draw the visualization.
-        var ac = new google.visualization.ComboChart(document.getElementById(elem));
+        var ac = new google.visualization.ComboChart(document.getElementById('visualization-' + domain));
 		var options = {
 			backgroundColor: '#fefbf1',
 			fontSize : 14,
@@ -34,11 +43,9 @@
 					textStyle:{color: 'grey'}, 
 					logScale: true, 
 					baselineColor: '#93a1a1',
-					// viewWindowMode: 'explicit',
-					// 					viewWindow: {min: 0.85, max: 2.6}
 				},
 				1:{	
-					logScale: log,
+					logScale: true,
 					title:'Distance',
 					textStyle:{color: 'grey'}, 
 				}
@@ -49,34 +56,36 @@
 	
 	function drawWeeks() {
 		var rowData = [
-			['Week','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
+			//['Week','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
 		{% for week in all_weeks reversed %}
 			['{{week.first_date|date:"n/j"}}', 
 			  {{week.efficiency|floatformat:3}}, 
 			  {{week.speed|floatformat:3}},
+			  'Pace: {{week.pace}}',
 			  {{week.distance}},
 	  		  {{week.average|floatformat:1}},
 			],
 		{% endfor %}
 			]
 			
-		drawVis(rowData, 'visualization-weeks', true);
+		drawVis(rowData, 'weeks');
 	}
 	
 	function drawMonths() {
 		var rowData = [
-			['Month','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
+			//['Month','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
 		{% for month in all_months reversed %}
 			['{{month.first_date|date:"n/y"}}', 
 			  {{month.efficiency|floatformat:3}}, 
 			  {{month.speed|floatformat:3}},
+			  'Pace: {{month.pace}}',
 			  {{month.distance}},
      	      {{month.average|floatformat:1}},
 			],
 		{% endfor %}
 			]
 		
-		drawVis(rowData, 'visualization-months', true);
+		drawVis(rowData, 'months');
 	}
 
 	google.setOnLoadCallback(drawWeeks);

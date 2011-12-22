@@ -62,8 +62,8 @@
 			  {{week.efficiency|floatformat:3}}, 
 			  {{week.speed|floatformat:3}},
 			  'Pace: {{week.pace}}',
-			  {{week.distance}},
-	  		  {{week.average|floatformat:1}},
+			  {{week.distance|floatformat:2}},
+	  		  {{week.average|floatformat:2}},
 			],
 		{% endfor %}
 			]
@@ -79,8 +79,8 @@
 			  {{month.efficiency|floatformat:3}}, 
 			  {{month.speed|floatformat:3}},
 			  'Pace: {{month.pace}}',
-			  {{month.distance}},
-     	      {{month.average|floatformat:1}},
+			  {{month.distance|floatformat:2}},
+     	      {{month.average|floatformat:2}},
 			],
 		{% endfor %}
 			]

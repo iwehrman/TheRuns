@@ -1,0 +1,64 @@
+{% extends "run/base_14.html" %}
+
+{% block title %}The Runs: Password Reset {% endblock title %}
+
+{% block init %}
+<script type="text/javascript"> 
+	$(document).ready( function(){
+	$('input[tabindex=1]').focus();
+	});
+</script>
+{% endblock init %}
+{% block header %} Password Reset {% endblock header %}
+
+{% block login-menu %}{% endblock login-menu %}
+
+{% block main_14 %}
+
+	<form action="/reset_finish/" method="post">
+	{% csrf_token %}
+	<fieldset>
+	<legend> Finish password reset </legend>
+
+	<div class="clearfix">
+		<label for="username">Key (from email)</label>
+		<div class="input">
+			<input tabindex="1" type="text" name="resetkey" id="resetkey" 
+				class="input-large" value="{{resetkey}}">
+		</div>
+	</div>
+
+	<div class="clearfix">
+		<label for="username">Username</label>
+		<div class="input">
+			<input tabindex="2" type="text" name="username" id="username" 
+				class="input-large" value="{{username}}">
+		</div>
+	</div>	
+
+	<div class="clearfix">
+		<label for="username">New Password</label>
+		<div class="input">
+			<input tabindex="3" type="password" name="newpassword1" id="newpassword1" 
+				class="input-large">
+		</div>
+	</div>
+	
+	<div class="clearfix">
+		<label for="username">New Password (again)</label>
+		<div class="input">
+			<input tabindex="4" type="password" name="newpassword2" id="newpassword2" 
+				class="input-large">
+		</div>
+	</div>
+
+	<div class="clearfix">
+		<div class="input">
+			<button tabindex="5" name = "login" class="btn primary">Submit</button>
+		</div>
+	</div>
+
+	</fieldset>
+	</form>
+
+{% endblock main_14 %}

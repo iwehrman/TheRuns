@@ -2,7 +2,9 @@ import datetime, calendar
 from urllib import urlencode
 from datetime import date, time, timedelta
 from decimal import Decimal
+import random
 import json
+
 #from weakref import WeakValueDictionary
 
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
@@ -14,6 +16,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
+from django.core.mail import send_mail
 
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, UserProfileForm
@@ -249,29 +252,35 @@ def index(request):
     
 def do_login(request):
     if request.method == "GET":
-        if 'destination' in request.GET: 
-            destination = request.GET['destination']
-            print "GET: Destination: " + destination
-            context = {'destination': destination}
-        else: 
-            context = {} 
+        if 'destination' in request.session:
+            destination = request.session['destination']
+            print "destination: " + destination
+
         return render_to_response('run/login.html', 
-            context,  
             context_instance=RequestContext(request))
     elif request.method == "POST": 
-        username = request.POST['username']
-        password = request.POST['password']
-        destination = request.POST['destination']
-        print "POST: " + destination
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                if not destination: 
-                    return HttpResponseRedirect(reverse('run.views.index'))
-                else:
-                    return HttpResponseRedirect(destination)
-        return redirect_to_login(request, destination)
+
+        if 'reset' in request.POST:
+            if 'username' in request.POST: 
+                request.session['resetusername'] = request.POST['username']
+                
+            return HttpResponseRedirect(reverse('run.views.password_reset_start'))
+        else:
+            username = request.POST['username']
+            password = request.POST['password']
+
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    if 'destination' in request.session: 
+                        destination = request.session['destination']
+                        del request.session['destination']
+                        return HttpResponseRedirect(destination)
+                    else:
+                        return HttpResponseRedirect(reverse('run.views.index'))
+            else: 
+                return redirect_to_login(request, reset_destination=False)
     
 def do_logout(request):
     if request.user.is_authenticated():
@@ -282,12 +291,11 @@ def do_logout(request):
 def do_permission_denied(request):
     return HttpResponseForbidden("Sorry, you can't have that.")
 
-def redirect_to_login(request, destination=None):
-    if not destination: 
-        destination = request.get_full_path()
-    params = urlencode({'destination': destination})
-    return HttpResponseRedirect(reverse('run.views.do_login') + 
-        '?%s' % params)
+def redirect_to_login(request, reset_destination=True):
+    if reset_destination: 
+        request.session['destination'] = request.get_full_path()
+        
+    return HttpResponseRedirect(reverse('run.views.do_login'))
 
 def export(request):
     user = request.user
@@ -311,6 +319,98 @@ def export(request):
         return HttpResponse(json.dumps(serialize_all_runs(Run.objects.filter(user=user.id).order_by('-date'))),
             mimetype="application/json")
     
+    
+def password_reset_start(request):
+    if request.method == 'GET': 
+        if 'resetusername' in request.session: 
+            context = {'username': request.session['resetusername']}
+        else: 
+            context = {}
+        return render_to_response('run/reset_start.html', context,
+            context_instance=RequestContext(request))
+    elif request.method == 'POST': 
+        if 'username' in request.POST and len(request.POST['username']) > 0: 
+            username = request.POST['username']
+            request.session['resetusername'] = username
+            
+            try:
+                user = User.objects.get(username__exact=username)
+                key = str(random.randint(100000,999999))
+                request.session['resetkey'] = key
+                
+                from_addr = 'no-reply@run.wehrman.me'
+                to_addr = user.email
+                recipient_list = [to_addr]
+                subject = 'Password reset request'
+                short_url = reverse('run.views.password_reset_finish')
+                short_uri = request.build_absolute_uri(short_url)
+                params = urlencode({'u': username, 'k': key})
+                full_url = short_url + '?%s' % params
+                full_uri = request.build_absolute_uri(full_url)
+                body = ('Howdy ' + user.first_name + ',\n\n' + 
+                    'To reset the password for user ' + username + 
+                    ' at The Runs, return to ' + short_uri +
+                    ' and enter the key ' + key + 
+                    ', or just click here: ' + full_uri)
+                
+                send_mail(subject, body, from_addr, recipient_list)
+                return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
+            except Exception as e: 
+                print e
+                return render_to_response('run/reset_start.html', 
+                    context_instance=RequestContext(request))
+        else: 
+            return render_to_response('run/reset_start.html', 
+                context_instance=RequestContext(request))
+    
+def password_reset_finish(request):
+    if request.method == 'GET': 
+        context = {}
+        if 'u' in request.GET: 
+            context['username'] = request.GET['u']
+        elif 'resetusername' in request.session: 
+            context['username'] = request.session['resetusername']
+            
+        if 'k' in request.GET: 
+            context['resetkey'] = request.GET['k']
+            
+        return render_to_response('run/reset_finish.html', context,
+            context_instance=RequestContext(request))
+    elif request.method == 'POST': 
+        if 'username' in request.POST and len(request.POST['username']) > 0: 
+            username = request.POST['username']
+            
+            try:
+                user = User.objects.get(username__exact=username)
+                submittedkey = request.POST['resetkey']
+                sessionkey = request.session['resetkey']
+                if submittedkey == sessionkey: 
+                    newpassword1 = request.POST['newpassword1']
+                    newpassword2 = request.POST['newpassword2']
+                    if len(newpassword1) > 0 and newpassword1 == newpassword2:
+                        user.set_password(newpassword2)
+                        user.save()
+                        
+                        del request.session['resetusername']
+                        del request.session['resetkey']
+                        
+                        user = authenticate(username=username, password=newpassword2)
+                        if user is not None:
+                            if user.is_active:
+                                login(request, user)
+                                return HttpResponseRedirect(reverse('run.views.index'))
+                    
+            except Exception as e: 
+                print e
+                return render_to_response('run/reset_finish.html', 
+                    context_instance=RequestContext(request))
+            else:
+                return render_to_response('run/reset_finish.html', 
+                    context_instance=RequestContext(request))
+        else: 
+            return render_to_response('run/reset_finish.html', 
+                context_instance=RequestContext(request))
+        
 
 
 ### UserProfile ###

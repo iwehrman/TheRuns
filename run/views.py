@@ -601,7 +601,7 @@ def run_delete(request, run_id):
     
     messages.success(request, "Deleted run.")
 
-    return HttpResponseRedirect(reverse('run.views.userprofile') + '?rundel=' + run_id)
+    return HttpResponseRedirect(reverse('run.views.userprofile'))
     
     
 ### Shoes ###

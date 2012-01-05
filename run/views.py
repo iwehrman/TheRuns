@@ -18,6 +18,8 @@ from django.views.decorators.cache import cache_control
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, UserProfileForm
 
+BASE_URI = "http://run.wehrman.me"
+
 week_cache = {} #WeakValueDictionary()
 month_cache = {} #WeakValueDictionary()
 last_modified_cache = {}
@@ -340,10 +342,12 @@ def password_reset_start(request):
                 recipient_list = [to_addr]
                 subject = 'Password reset request'
                 short_url = reverse('run.views.password_reset_finish')
-                short_uri = request.build_absolute_uri(short_url)
+                # short_uri = request.build_absolute_uri(short_url)
+                short_uri = BASE_URI + short_url
                 params = urlencode({'u': username, 'k': key})
                 full_url = short_url + '?%s' % params
-                full_uri = request.build_absolute_uri(full_url)
+                # full_uri = request.build_absolute_uri(full_url)
+                full_uri = BASE_URI + full_url
                 body = ('Howdy ' + user.first_name + ',\n\n' + 
                     'To reset the password for user ' + username + 
                     ' at The Runs, return to ' + short_uri +

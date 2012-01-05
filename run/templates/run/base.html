@@ -113,46 +113,19 @@
 		
 	<div class="container">
 		<div class="content">
+
+		<div class="row">
+			{% if messages %}
+				<div class="span10 offset2">
+			    {% for message in messages %}
+				<div class="alert-message {{ message.tags }} fade in" data-alert="alert">
+				  <a class="close" href="#">×</a>
+				  <p><strong>{{message.tags|capfirst}}:</strong> {{message}}</p>
+				</div>
+			    {% endfor %}
+				</div>
+			{% endif %}
 			
-		<!--
-		<div class="page-header">
-    		<h1>{% block header %}Generic header{% endblock header %}</h1>
-		</div>
-		-->
-		
-		<div class="row">
-			<div class="span10 offset2">
-			{% if error_message %}
-			<div class="alert-message error fade in" data-alert="alert">
-			  <a class="close" href="#">×</a>
-			  <p><strong>Error:</strong> {{error_message}}</p>
-			</div>
-			{% endif %}
-	
-			{% if warning_message %}
-			<div class="alert-message warning fade in" data-alert="alert">
-			  <a class="close" href="#">×</a>
-			  <p><strong>Warning:</strong> {{warning_message}}</p>
-			</div>
-			{% endif %}
-	
-			{% if info_message %}
-			<div class="alert-message info fade in" data-alert="alert">
-			  <a class="close" href="#">×</a>
-			  <p><strong>Info:</strong> {{info_message}}</p>
-			</div>
-			{% endif %}
-	
-			{% if success_message %}
-			<div class="alert-message success fade in" data-alert="alert">
-			  <a class="close" href="#">×</a>
-			  <p><strong>Success:</strong> {{success_message}}</p>
-			</div>
-			{% endif %}
-			</div>	
-		</div>
-				
-		<div class="row">
 			{% block main %} Generic main {% endblock main %}
 		</div> <!-- /row -->
 		

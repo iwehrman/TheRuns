@@ -1,22 +1,19 @@
-import datetime, calendar
-from urllib import urlencode
+import datetime, calendar, random, json
 from datetime import date, time, timedelta
 from decimal import Decimal
-import random
-import json
+from urllib import urlencode
 
-#from weakref import WeakValueDictionary
-
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
-from django.shortcuts import render_to_response, get_object_or_404
-from django.core.urlresolvers import reverse
-from django.template import RequestContext
+from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template import RequestContext
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
-from django.core.mail import send_mail
 
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, UserProfileForm
@@ -354,6 +351,10 @@ def password_reset_start(request):
                     ', or just click here: ' + full_uri)
                 
                 send_mail(subject, body, from_addr, recipient_list)
+                
+                messages.success(request, 'An email has been sent to you with a key. ' +  
+                    'Enter it below to reset your password.')
+                
                 return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
             except Exception as e: 
                 print e
@@ -431,14 +432,6 @@ def userprofile(request):
         context['runs'] = runs
         context['shoes'] = shoes
         context['today'] = today
-        
-        if request.GET.get('rundel'):
-            context['info_message'] = ("Run removed.")
-        elif request.GET.get('shoedel'):
-            context['info_message'] = ("Shoe removed.")
-        elif request.GET.get('shoeret'):
-            context['info_message'] = ("Shoe retired.")
-
 
         return render_to_response('run/profile.html', context, 
             context_instance=RequestContext(request))
@@ -594,6 +587,8 @@ def run_update(request):
         profile.last_shoe = shoe
         shoe.save()
         profile.save()
+        
+    messages.success(request, "Added run " + str(run) + ".")
     
     return HttpResponseRedirect(reverse('run.views.userprofile'))
     
@@ -603,6 +598,8 @@ def run_delete(request, run_id):
     
     reset_last_modified(run.user.id)
     invalidate_aggregates(run.user, run.date)
+    
+    messages.success(request, "Deleted run.")
 
     return HttpResponseRedirect(reverse('run.views.userprofile') + '?rundel=' + run_id)
     
@@ -663,6 +660,8 @@ def shoe_update(request):
     shoe.active = True
     shoe.save()
     reset_last_modified(user.id)
+    
+    messages.success(request, "Shoe added.")
     return HttpResponseRedirect(reverse('run.views.userprofile'))
 
 def shoe_delete(request, shoe_id):
@@ -673,8 +672,9 @@ def shoe_delete(request, shoe_id):
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     shoe.delete()
     reset_last_modified(shoe.user.id)
-    return HttpResponseRedirect(reverse('run.views.userprofile') + 
-        '?shoedel=' + shoe_id)
+    
+    messages.success(request, "Shoe deleted.")
+    return HttpResponseRedirect(reverse('run.views.userprofile'))
         
 def shoe_retire(request, shoe_id):
     user = request.user
@@ -685,5 +685,6 @@ def shoe_retire(request, shoe_id):
     shoe.active = False
     shoe.save()
     reset_last_modified(shoe.user.id)
-    return HttpResponseRedirect(reverse('run.views.userprofile') + 
-        '?shoeret=' + shoe_id)
+    
+    messages.success(request, "Shoe retired.")
+    return HttpResponseRedirect(reverse('run.views.userprofile'))

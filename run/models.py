@@ -21,7 +21,7 @@ class Shoe(models.Model):
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.make + " " + self.model
+        return self.make + " " + self.model + " (" + str(self.miles) + ")"
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -32,6 +32,11 @@ class UserProfile(models.Model):
         on_delete=models.SET_NULL)
     resting_heart_rate = models.PositiveIntegerField(blank=True, null=True)
         
+    def __unicode__(self):
+        return ("(gender: " + str(self.gender) + ", weight: " + str(self.weight) + 
+            ", birthday: " + str(self.birthday) + ", HR: " + str(self.resting_heart_rate) + 
+            ", last_shoe: " + str(self.last_shoe) + ")")
+        
     def maximum_heart_rate(self):
         return 205.8 - (0.685 * float(self.age_in_years()))
 
@@ -40,18 +45,13 @@ class UserProfile(models.Model):
         total_seconds = td.seconds + (3600 * 24 * td.days)
         seconds_in_year = 3600 * 24 * 365
         return int(total_seconds // seconds_in_year)
-            
-
+    
     def weight_in_kg(self):
         return Decimal(self.weight) * kg_per_pound
 
     def vO2max(self):
         return (15.0 * 
-            (self.maximum_heart_rate() / float(self.resting_heart_rate)))
-    
-    def __unicode__(self):
-        return str(self.user) + " (" + str(self.birthday) + ")"
-        
+            (self.maximum_heart_rate() / float(self.resting_heart_rate)))        
     
 class Run(models.Model):
     user = models.ForeignKey(User) 

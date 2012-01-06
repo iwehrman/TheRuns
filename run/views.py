@@ -74,7 +74,7 @@ def get_aggregate_from_db(user, first_date, last_date):
     ags = Aggregate.objects.filter(user=user.id, 
         first_date=first_date, last_date=last_date)
     if len(ags) == 1:
-        log.debug("Aggregate DB HIT: %s" % ags[0])
+        # log.debug("Aggregate DB HIT: %s" % ags[0])
         return ags[0]
     elif len(ags) == 0: 
         ag = aggregate_runs(user, first_date, last_date)
@@ -101,11 +101,11 @@ def invalidate_aggregates(user, date):
 def get_aggregate_generic(cache, user, first_date, last_date): 
     if (user.id, first_date) in cache: 
         ag = cache[(user.id, first_date)]
-        log.debug("Aggregate CACHE HIT: %s" % ag)
+        # log.debug("Aggregate CACHE HIT: %s" % ag)
         return ag
     else: 
-        log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
-            (user.username, first_date, last_date))
+        # log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
+        #             (user.username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
         cache[(user.id, first_date)] = ag
         return ag
@@ -197,7 +197,7 @@ def __index_generic(request, user):
         ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
         all_months.append(ag)
         
-    log.debug('Duration: %s', (datetime.datetime.now() - start))
+    log.debug('Index generation time: %s', (datetime.datetime.now() - start))
         
     context = {'this_week': all_weeks[0],
         'last_week': all_weeks[1], 
@@ -271,7 +271,9 @@ def do_login(request):
 
             user = authenticate(username=username, password=password)
             if user is not None:
+                
                 if user.is_active:
+                    log.info("Successful login: %s", user)
                     login(request, user)
                     if 'destination' in request.session: 
                         destination = request.session['destination']
@@ -279,11 +281,15 @@ def do_login(request):
                         return HttpResponseRedirect(destination)
                     else:
                         return HttpResponseRedirect(reverse('run.views.index'))
+                else:
+                    log.warning("Failed login: %s", user)
             else: 
+                log.warning("Failed login: %s", username)
                 return redirect_to_login(request, reset_destination=False)
     
 def do_logout(request):
     if request.user.is_authenticated():
+        log.info("Logout: %s", request.user)
         logout(request)
     
     return HttpResponseRedirect(reverse('run.views.do_login'))
@@ -357,6 +363,8 @@ def password_reset_start(request):
                 
                 send_mail(subject, body, from_addr, recipient_list)
                 
+                
+                log.info("Password reset email sent for %s to %s", user, user.email)
                 messages.success(request, 'An email has been sent to you with a key. ' +  
                     'Enter it below to reset your password.')
                 
@@ -396,6 +404,8 @@ def password_reset_finish(request):
                     if len(newpassword1) > 0 and newpassword1 == newpassword2:
                         user.set_password(newpassword2)
                         user.save()
+                        
+                        log.info("Password reset for %s", user)
                         
                         del request.session['resetusername']
                         del request.session['resetkey']
@@ -463,6 +473,8 @@ def userprofile_update(request):
         pform = UserProfileForm(instance=profile)
 
     context = {'uform': uform, 'pform': pform}
+
+    log.info("Updated profile for %s: %s", user, profile)
 
     return render_to_response('run/profile_edit.html', 
         context,
@@ -593,12 +605,19 @@ def run_update(request):
         shoe.save()
         profile.save()
         
+    log.info('Added run for %s: %s', user, run)
+        
     messages.success(request, "Added run " + str(run) + ".")
     
     return HttpResponseRedirect(reverse('run.views.userprofile'))
     
 def run_delete(request, run_id):
+    user = request.user
+    if not user.is_authenticated(): 
+        return redirect_to_login(request)
+        
     run = get_object_or_404(Run, pk=run_id)
+    log.info('Deleting run for %s: %s', user, run)
     run.delete()
     
     reset_last_modified(run.user.id)
@@ -610,12 +629,6 @@ def run_delete(request, run_id):
     
     
 ### Shoes ###
-
-def shoe_detail(request, shoe_id):
-    if not request.user.is_authenticated(): 
-        return redirect_to_login(request)
-
-    return HttpResponse("Hello shoe %s." %  shoe_id)
 
 def shoe_new(request):
     if not request.user.is_authenticated(): 
@@ -666,6 +679,7 @@ def shoe_update(request):
     shoe.save()
     reset_last_modified(user.id)
     
+    log.info('Added shoe for %s: %s', user, shoe)
     messages.success(request, "Shoe added.")
     return HttpResponseRedirect(reverse('run.views.userprofile'))
 
@@ -675,6 +689,7 @@ def shoe_delete(request, shoe_id):
         return redirect_to_login(request)
         
     shoe = get_object_or_404(Shoe, pk=shoe_id)
+    log.info('Deleting shoe for %s: %s', user, shoe)
     shoe.delete()
     reset_last_modified(shoe.user.id)
     
@@ -691,5 +706,6 @@ def shoe_retire(request, shoe_id):
     shoe.save()
     reset_last_modified(shoe.user.id)
     
+    log.info('Retired shoe for %s: %s', user, shoe)
     messages.success(request, "Shoe retired.")
     return HttpResponseRedirect(reverse('run.views.userprofile'))

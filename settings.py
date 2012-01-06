@@ -1,6 +1,9 @@
 # Django settings for fit project.
 
-DEBUG = True
+BASE_DIR = '/Users/ian/Scripts/'
+# BASE_DIR = '/home/iwehrman/'
+
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -12,7 +15,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/Users/ian/Scripts/fit/fit.sqlite',                      # Or path to database file if using sqlite3.
+        'NAME': BASE_DIR + 'fit/fit.sqlite',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -58,7 +61,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/Users/ian/Scripts/static'
+STATIC_ROOT = BASE_DIR + '/static'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -106,10 +109,10 @@ MIDDLEWARE_CLASSES = (
     
 )
 
-ROOT_URLCONF = 'fit.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    "/Users/ian/Scripts/fit/run/templates"
+    BASE_DIR + '/fit/run/templates'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -140,28 +143,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
+SEND_BROKEN_LINK_EMAILS = True
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -170,3 +152,50 @@ EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'run@wehrman.me'
 EMAIL_HOST_PASSWORD = 'pe5wu6fort1bi6ga'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'default': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': 'everything.log',
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'standard',
+        },  
+        'request_handler': {
+                'level':'DEBUG',
+                'class':'logging.handlers.RotatingFileHandler',
+                'filename': 'django_request.log',
+                'maxBytes': 1024*1024*5, # 5 MB
+                'backupCount': 5,
+                'formatter':'standard',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'standard',
+            'include_html': True,
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['default'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'django.request': { # Stop SQL debug from logging to main logger
+            'handlers': ['request_handler', 'mail_admins'],
+            'level': 'DEBUG',
+            'propagate': False
+        },
+    }
+}
+

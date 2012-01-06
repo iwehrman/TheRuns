@@ -1,4 +1,4 @@
-import datetime, calendar, random, json
+import datetime, calendar, logging, random, json
 from datetime import date, time, timedelta
 from decimal import Decimal
 from urllib import urlencode
@@ -19,6 +19,8 @@ from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, UserProfileForm
 
 BASE_URI = "http://run.wehrman.me"
+
+log = logging.getLogger(__name__)
 
 week_cache = {} #WeakValueDictionary()
 month_cache = {} #WeakValueDictionary()
@@ -72,11 +74,11 @@ def get_aggregate_from_db(user, first_date, last_date):
     ags = Aggregate.objects.filter(user=user.id, 
         first_date=first_date, last_date=last_date)
     if len(ags) == 1:
-        # print "Aggregate DB HIT: %s" % ags[0]
+        log.debug("Aggregate DB HIT: %s" % ags[0])
         return ags[0]
     elif len(ags) == 0: 
         ag = aggregate_runs(user, first_date, last_date)
-        print "Aggregate DB MISS: %s" % ag
+        log.info("Aggregate DB MISS: %s" % ag)
         return ag
     else: 
         raise Exception("Multiple agregates for %s at %s - %s" % 
@@ -88,26 +90,25 @@ def invalidate_aggregates(user, date):
     for ag in ags: 
         key = (user.id, ag.first_date)
         if key in week_cache: 
-            print "Evicting %s from week_cache" % week_cache[key]
+            log.info("Evicting %s from week_cache" % week_cache[key])
             del week_cache[key]
         if key in month_cache: 
-            print "Evicting %s from month_cache" % month_cache[key]
+            log.info("Evicting %s from month_cache" % month_cache[key])
             del month_cache[key]
-        print "Evicting %s from DB" % ag
+        log.debug('Evicting %s from DB', ag)
     ags.delete()
 
 def get_aggregate_generic(cache, user, first_date, last_date): 
     if (user.id, first_date) in cache: 
         ag = cache[(user.id, first_date)]
-        # print "Aggregate CACHE HIT: %s" % ag
+        log.debug("Aggregate CACHE HIT: %s" % ag)
         return ag
     else: 
-        # print ("Aggregate CACHE MISS: %s: %s - %s" % 
-        #    (user.username, first_date, last_date))
+        log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
+            (user.username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
         cache[(user.id, first_date)] = ag
         return ag
-    
 
 def get_week_aggregate(user, first_date, last_date):
     return get_aggregate_generic(week_cache, user, first_date, last_date) 
@@ -196,7 +197,7 @@ def __index_generic(request, user):
         ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
         all_months.append(ag)
         
-    # print "Duration: %s" % (datetime.datetime.now() - start)
+    log.debug('Duration: %s', (datetime.datetime.now() - start))
         
     context = {'this_week': all_weeks[0],
         'last_week': all_weeks[1], 
@@ -253,7 +254,7 @@ def do_login(request):
     if request.method == "GET":
         if 'destination' in request.session:
             destination = request.session['destination']
-            print "destination: " + destination
+            log.debug('destination: %s', destination)
 
         return render_to_response('run/login.html', 
             context_instance=RequestContext(request))
@@ -361,7 +362,7 @@ def password_reset_start(request):
                 
                 return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
             except Exception as e: 
-                print e
+                log.error(str(e))
                 return render_to_response('run/reset_start.html', 
                     context_instance=RequestContext(request))
         else: 
@@ -406,7 +407,7 @@ def password_reset_finish(request):
                                 return HttpResponseRedirect(reverse('run.views.index'))
                     
             except Exception as e: 
-                print e
+                log.error(str(e))
                 return render_to_response('run/reset_finish.html', 
                     context_instance=RequestContext(request))
             else:

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>run/templates/run/index.html</string>
+	<string>settings.py</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -32,7 +32,9 @@
 			<key>filename</key>
 			<string>settings.py</string>
 			<key>lastUsed</key>
-			<date>2011-12-18T19:41:15Z</date>
+			<date>2012-01-05T19:53:41Z</date>
+			<key>selected</key>
+			<true/>
 		</dict>
 		<dict>
 			<key>filename</key>
@@ -133,33 +135,19 @@
 				<integer>38</integer>
 			</dict>
 		</dict>
-		<key>run/static/bootstrap/lib/mixins.less</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>18</integer>
-				<key>line</key>
-				<integer>54</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>35</integer>
-		</dict>
 		<key>run/static/bootstrap/lib/patterns.less</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>19</integer>
+				<integer>32</integer>
 				<key>line</key>
-				<integer>43</integer>
+				<integer>695</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>229</integer>
+			<integer>661</integer>
 		</dict>
 		<key>run/static/bootstrap/lib/scaffolding.less</key>
 		<dict>
@@ -191,35 +179,19 @@
 				<integer>14</integer>
 			</dict>
 		</dict>
-		<key>run/static/bootstrap/lib/type.less</key>
+		<key>run/static/bootstrap/lib/solarized.less</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>13</integer>
+				<integer>22</integer>
 				<key>line</key>
-				<integer>163</integer>
+				<integer>7</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>2</integer>
-				<key>line</key>
-				<integer>163</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>13</integer>
-				<key>line</key>
-				<integer>163</integer>
-			</dict>
 		</dict>
 		<key>run/static/bootstrap/lib/variables.less</key>
 		<dict>
@@ -254,14 +226,30 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>35</integer>
+				<integer>2</integer>
 				<key>line</key>
-				<integer>98</integer>
+				<integer>2</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>70</integer>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>1</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>5</integer>
+				<key>line</key>
+				<integer>2</integer>
+			</dict>
 		</dict>
 		<key>run/templates/run/base_14.html</key>
 		<dict>
@@ -296,14 +284,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>26</integer>
+				<integer>7</integer>
 				<key>line</key>
-				<integer>2</integer>
+				<integer>36</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
 		<key>run/templates/run/profile.html</key>
 		<dict>
@@ -332,6 +320,34 @@
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>10</integer>
+		</dict>
+		<key>run/templates/run/reset_finish.html</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>8</integer>
+				<key>line</key>
+				<integer>35</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>15</integer>
+		</dict>
+		<key>run/templates/run/reset_start.html</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>32</integer>
+				<key>line</key>
+				<integer>20</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 		<key>run/templates/run/run_all.html</key>
 		<dict>
@@ -438,9 +454,9 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>30</integer>
+				<integer>16</integer>
 				<key>line</key>
-				<integer>12</integer>
+				<integer>15</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
@@ -452,14 +468,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>19</integer>
+				<integer>32</integer>
 				<key>line</key>
-				<integer>52</integer>
+				<integer>20</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>16</integer>
+			<integer>31</integer>
 		</dict>
 		<key>settings.py</key>
 		<dict>
@@ -468,12 +484,28 @@
 				<key>column</key>
 				<integer>0</integer>
 				<key>line</key>
-				<integer>8</integer>
+				<integer>150</integer>
 			</dict>
+			<key>columnSelection</key>
+			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>0</integer>
+			<integer>127</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>1</integer>
+				<key>line</key>
+				<integer>166</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>150</integer>
+			</dict>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
@@ -490,17 +522,18 @@
 		<string>run/templates/500.html</string>
 		<string>run/models.py</string>
 		<string>run/templates/run/base.html</string>
+		<string>run/templates/run/reset_start.html</string>
+		<string>run/templates/run/reset_finish.html</string>
 		<string>run/templates/run/login.html</string>
 		<string>run/templates/run/base_14.html</string>
 		<string>run/static/bootstrap/bootstrap.min.css</string>
 		<string>run/templates/run/profile_edit.html</string>
 		<string>run/forms.py</string>
-		<string>run/static/bootstrap/lib/type.less</string>
-		<string>run/static/bootstrap/lib/mixins.less</string>
 		<string>run/static/bootstrap/lib/patterns.less</string>
 		<string>run/static/bootstrap/lib/scaffolding.less</string>
 		<string>run/static/bootstrap/lib/forms.less</string>
 		<string>run/static/bootstrap/lib/variables.less</string>
+		<string>run/static/bootstrap/lib/solarized.less</string>
 		<string>run/templates/run/run_table.html</string>
 		<string>run/templates/run/shoe_table.html</string>
 	</array>

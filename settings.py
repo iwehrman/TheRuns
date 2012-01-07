@@ -3,7 +3,7 @@
 BASE_DIR = '/Users/ian/Scripts/'
 # BASE_DIR = '/home/iwehrman/'
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -143,6 +143,18 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
+CACHES = {
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+    # }
+    'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+}
+
 SEND_BROKEN_LINK_EMAILS = True
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -186,7 +198,7 @@ LOGGING = {
         }
     },
     'loggers': {
-        '': {
+        'run': {
             'handlers': ['default'],
             'level': 'DEBUG',
             'propagate': True

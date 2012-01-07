@@ -6,6 +6,7 @@ from urllib import urlencode
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
@@ -22,9 +23,15 @@ BASE_URI = "http://run.wehrman.me"
 
 log = logging.getLogger(__name__)
 
-week_cache = {} #WeakValueDictionary()
-month_cache = {} #WeakValueDictionary()
-last_modified_cache = {}
+WEEK_AG_PREFIX = 'WEEK_AG'
+MONTH_AG_PREFIX = 'MONTH_AG'
+LM_PREFIX = 'LM'
+
+def get_ag_cache_key(prefix, userid, date): 
+    return "%s_%d_%d_%d_%d" % (prefix, userid, date.year, date.month, date.day)
+        
+def get_lm_cache_key(userid):
+    return "%s_%d" % (LM_PREFIX,userid)
 
 def aggregate_runs(user, first_day, last_day):
     duration = 0
@@ -87,34 +94,34 @@ def get_aggregate_from_db(user, first_date, last_date):
 def invalidate_aggregates(user, date):
     ags = Aggregate.objects.filter(user=user.id,first_date__lte=date,
         last_date__gte=date)
-    for ag in ags: 
-        key = (user.id, ag.first_date)
-        if key in week_cache: 
-            log.info("Evicting %s from week_cache" % week_cache[key])
-            del week_cache[key]
-        if key in month_cache: 
-            log.info("Evicting %s from month_cache" % month_cache[key])
-            del month_cache[key]
-        log.debug('Evicting %s from DB', ag)
+    
+    week_keys = [get_ag_cache_key(WEEK_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    log.info("Evicting %s from week_cache", cache.get_many(week_keys))
+    cache.delete_many(week_keys)
+    month_keys = [get_ag_cache_key(MONTH_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    log.info("Evicting %s from month_cache", cache.get_many(month_keys))
+    cache.delete_many(month_keys)
+
     ags.delete()
 
-def get_aggregate_generic(cache, user, first_date, last_date): 
-    if (user.id, first_date) in cache: 
-        ag = cache[(user.id, first_date)]
+def get_aggregate_generic(prefix, user, first_date, last_date): 
+    key = get_ag_cache_key(prefix, user.id, first_date)
+    ag = cache.get(key)
+    if ag: 
         # log.debug("Aggregate CACHE HIT: %s" % ag)
         return ag
     else: 
-        # log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
-        #             (user.username, first_date, last_date))
+        log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
+            (user.username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
-        cache[(user.id, first_date)] = ag
+        cache.set(key, ag)
         return ag
 
 def get_week_aggregate(user, first_date, last_date):
-    return get_aggregate_generic(week_cache, user, first_date, last_date) 
+    return get_aggregate_generic(WEEK_AG_PREFIX, user, first_date, last_date) 
 
 def get_month_aggregate(user, first_date, last_date):
-        return get_aggregate_generic(month_cache, user, first_date, last_date) 
+    return get_aggregate_generic(MONTH_AG_PREFIX, user, first_date, last_date) 
 
 
 def index_last_modified_user(request, user): 
@@ -128,11 +135,11 @@ def index_last_modified_user(request, user):
     this_morning = datetime.datetime.now().replace(hour=0,minute=0,second=0)
     
     userid = user.id
-    if userid in last_modified_cache:
-        lm = last_modified_cache[userid]
-    else:
+    key = get_lm_cache_key(userid)
+    lm = cache.get(key)
+    if not lm: 
         lm = datetime.datetime.now()
-        last_modified_cache[userid] = lm
+        cache.set(key, lm)
       
     if request.user.is_authenticated():
         ll = request.user.last_login
@@ -149,8 +156,8 @@ def index_last_modified_default(request):
     return index_last_modified_user(request, request.user)
     
 def reset_last_modified(userid):
-    if userid in last_modified_cache:
-        del last_modified_cache[userid]
+    key = get_lm_cache_key(userid)
+    cache.delete(key)
 
 def __index_generic(request, user):
     start = datetime.datetime.now()
@@ -197,7 +204,7 @@ def __index_generic(request, user):
         ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
         all_months.append(ag)
         
-    log.debug('Index generation time: %s', (datetime.datetime.now() - start))
+    log.debug('Index time for %s: %s', user, (datetime.datetime.now() - start))
         
     context = {'this_week': all_weeks[0],
         'last_week': all_weeks[1], 
@@ -254,7 +261,7 @@ def do_login(request):
     if request.method == "GET":
         if 'destination' in request.session:
             destination = request.session['destination']
-            log.debug('destination: %s', destination)
+            # log.debug('destination: %s', destination)
 
         return render_to_response('run/login.html', 
             context_instance=RequestContext(request))

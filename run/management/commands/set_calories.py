@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from fit.run.models import Run
+from run.models import Run
 
 class Command(BaseCommand):
     # args = '<username file.csv>'

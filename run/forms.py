@@ -6,13 +6,17 @@ class UserProfileForm(ModelForm):
     birthday = DateField(widget=DateInput(format='%m/%d/%Y',
         attrs={'class': 'span3', 'tabindex':'8'}), 
         label='Birthdate')
+    
+    gender = NullBooleanField(widget=Select(attrs={'class': 'span2', 'tabindex': '6'}, 
+            choices=((None, ''), (True, 'Male'), (False, 'Female'),)),
+            label='Sex')
         
     class Meta:
         model = UserProfile
         exclude = ('last_shoe', 'user',)
         widgets = {
-            'gender': Select(attrs={'class': 'span2', 'tabindex': '6'}, 
-                choices=((None, 'n/a'), (True, 'Male'), (False, 'Female'),)),
+            # 'gender': Select(attrs={'class': 'span2', 'tabindex': '6'}, 
+            #     choices=((None, 'n/a'), (True, 'Male'), (False, 'Female'),)),
             'weight': TextInput(attrs={'class': 'span2', 'tabindex': '7'}),
             'resting_heart_rate': TextInput(attrs={'class': 'span2', 'tabindex': '9'}),
         }

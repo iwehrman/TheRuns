@@ -56,18 +56,23 @@
 				<dt>Weight</dt>
 				<dd>{{ profile.weight }} lbs</dd>
 				<dt>Age</dt>
-				<dd>{{ profile.age_in_years }}</dd>
+				<dd>{{ profile.age_in_years }} years</dd>
 			</dl>
 		</div>
 		<div class="span4 offset12">
 			<dl>
-				<dt>Resting Heart Rate</dt>
-				<dd>{{ profile.resting_heart_rate }} bpm</dd>
-				<dt>Maximum Heart Rate</dt>
-				<dd>{{ profile.maximum_heart_rate|floatformat:0 }} bpm </dd>
-				<dt>vO<sub>2</sub>max</dt>
-				<dd>{{ profile.vO2max|floatformat:0 }}</dd>
+				<dt>Resting heart rate</dt>
+				<dd>{{ profile.resting_heart_rate }} b/min</dd>
+				<dt>Maximum heart rate&sup1;</dt>
+				<dd>{{ profile.maximum_heart_rate|floatformat:0 }} b/min </dd>
+				<dt>vO<sub>2</sub>max&sup1;</dt>
+				<dd>{{ profile.vO2max|floatformat:0 }} ml/kg/min</dd>
 			</dl>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span8">
+			(&sup1;) <i>Values are approximated using profile data.</i>
 		</div>
 	</div>
 	<!-- a href="/profile/update">Update profile.</a-->

@@ -8,18 +8,18 @@ class UserProfileForm(ModelForm):
         label='Birthdate')
     
     gender = NullBooleanField(widget=Select(attrs={'class': 'span2', 'tabindex': '6'}, 
-            choices=((None, ''), (True, 'Male'), (False, 'Female'),)),
-            label='Sex')
+        choices=((None, ''), (True, 'Male'), (False, 'Female'),)),
+        label='Sex')
+            
+    weight = CharField(widget=TextInput(attrs={'class': 'span2', 'tabindex': '7'}),
+        label='Weight (lbs)')
+        
+    resting_heart_rate = CharField(TextInput(attrs={'class': 'span2', 'tabindex': '9'}),
+        label='Resting heart rate (b/min)')
         
     class Meta:
         model = UserProfile
         exclude = ('last_shoe', 'user',)
-        widgets = {
-            # 'gender': Select(attrs={'class': 'span2', 'tabindex': '6'}, 
-            #     choices=((None, 'n/a'), (True, 'Male'), (False, 'Female'),)),
-            'weight': TextInput(attrs={'class': 'span2', 'tabindex': '7'}),
-            'resting_heart_rate': TextInput(attrs={'class': 'span2', 'tabindex': '9'}),
-        }
         
 class UserForm(ModelForm): 
     

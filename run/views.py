@@ -474,6 +474,8 @@ def userprofile_update(request):
             uform.save()
             pform.save()
             reset_last_modified(user.id)
+            
+            log.info("Updated profile for %s: %s", user, user.get_profile())
             return HttpResponseRedirect(reverse('run.views.userprofile'))
     else: 
         uform = UserForm(instance=user)
@@ -481,7 +483,7 @@ def userprofile_update(request):
 
     context = {'uform': uform, 'pform': pform}
 
-    log.info("Updated profile for %s: %s", user, profile)
+    
 
     return render_to_response('run/profile_edit.html', 
         context,

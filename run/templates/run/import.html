@@ -1,0 +1,56 @@
+{% extends "run/base_14.html" %}
+
+{% block title %}The Runs: Import runs {% endblock title %}
+
+{% block init %}
+<script type="text/javascript"> 
+	$(document).ready( function(){
+	$('input[tabindex=1]').focus();
+	});
+</script>
+{% endblock init %}
+{% block header %} Import runs {% endblock header %}
+
+{% block main_14 %}
+
+	<form action="/import/" method="post" enctype="multipart/form-data">
+	{% csrf_token %}
+	<fieldset>
+	<legend> Import runs </legend>
+
+	{% for field in form %}
+
+	<div class="clearfix {% if field.errors %}error{% endif %}">
+		<label for="{{ field.auto_id }}">{{ field.label }}</label>
+		<div class="input">
+			{{ field }}
+			{{ field.errors }}
+	    </div>	
+	</div>
+
+	{% endfor %}	
+
+	<div class="clearfix">
+		<div class="input">
+			<button tabindex="3" name = "import" class="btn primary">Import</button>
+		</div>
+	</div>
+
+	</fieldset>
+	</form>
+	
+	<hr>
+	
+	<div class="span10">
+	The data file should have a JSON list of records, each with the following fields: 
+	<ul>
+		<li>date: a string in yyyy-mm-dd format;</li>
+		<li>duration; an integer that denotes the number of seconds;</li>
+		<li>distance; an integer that denotes the number of meters;</li>
+		<li>average_heart_rate; an integer that denotes the number of beats/min, or null;</li>
+		<li>calories; an integer that denotes the number of kilocalories, or null.</li>
+	</ul> 
+	Existing run data can be <a href="/export">exported</a> in this format.  
+	</div>
+
+{% endblock main_14 %}

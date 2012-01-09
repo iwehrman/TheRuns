@@ -205,6 +205,20 @@ class Run(models.Model):
                 zone = 5
 
             self.zone = zone
+            
+    def zone_description(self):
+        zone = self.zone
+        if zone <= 1: 
+            return "warm up"
+        elif zone == 2: 
+            return "fat burning"
+        elif zone == 3: 
+            return "aerobic"
+        elif zone == 4: 
+            return "anaerobic"
+        else: 
+            return "maximum effort"
+        
 
 def formatted_time(t):
     if t.hour > 0: 

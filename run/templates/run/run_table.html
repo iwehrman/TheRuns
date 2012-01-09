@@ -25,7 +25,13 @@
 			<i>None</i>
 			{% endif %}</td>
 		<td>{% if run.average_heart_rate %} 
-			<span class="zone-{{run.zone}}" title="Zone {{run.zone}}">{{run.heart_rate_percent|floatformat:0}}%</span>
+			{% if run.zone %}
+			<span class="zone-{{run.zone}}" title="{{run.zone_description|title}} zone ({{run.zone}})">
+			{% endif %}
+			{{run.heart_rate_percent|floatformat:0}}%
+			{% if run.zone %}
+			</span>
+			{% endif %}
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>

@@ -97,7 +97,10 @@ class ImportForm(Form):
                             raise ValidationError("Unable to parse JSON file. Error: %s." % str(e))
 
     
-    data_file = ImportableFileField(label='Data file')
-    erase_existing_data = BooleanField(required=False,label='Erase existing?')
-    really_erase = BooleanField(required=False,label='Really erase?')
+    data_file = ImportableFileField(widget=FileInput(attrs={'tabindex': '1'}),
+        label='Data file')
+    erase_existing_data = BooleanField(widget=CheckboxInput(attrs={'tabindex': '2'}),
+        required=False,label='Erase existing?')
+    really_erase = BooleanField(widget=CheckboxInput(attrs={'tabindex': '3'}),
+        required=False,label='Really erase?')
     

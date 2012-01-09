@@ -62,6 +62,7 @@ class Run(models.Model):
     distance = models.DecimalField(max_digits=5, decimal_places=2)
     average_heart_rate = models.IntegerField(blank=True, null=True) 
     calories = models.IntegerField(blank=True, null=True)
+    zone = models.SmallIntegerField(blank=True, null=True)
 
     def __unicode__(self):
         return str(self.distance) + " miles on " + str(self.date)
@@ -179,6 +180,31 @@ class Run(models.Model):
             self.calories = int(float(weight_in_lbs) * 0.75 * float(self.distance))
         else: 
             self.calories = 0
+            
+    def set_zone(self):
+        profile = self.user.get_profile()
+
+        if profile.birthday and profile.resting_heart_rate: 
+            
+            hr = self.average_heart_rate
+            resthr = profile.resting_heart_rate
+            maxhr = profile.maximum_heart_rate()
+            
+            def thr(intensity):
+                return ((maxhr - resthr) * intensity) + resthr
+            
+            if hr <= thr(0.6): 
+                zone = 1
+            elif hr <= thr(0.7): 
+                zone = 2
+            elif hr <= thr(0.8): 
+                zone = 3
+            elif hr <= thr(0.9): 
+                zone = 4
+            else:
+                zone = 5
+
+            self.zone = zone
 
 def formatted_time(t):
     if t.hour > 0: 

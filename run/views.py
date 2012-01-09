@@ -335,6 +335,7 @@ def do_import(request):
                     
                 for run in runs: 
                     run.user = user
+                    run.set_zone()
                     if not run.calories: 
                         run.set_calories()
                     log.debug("Importing run %s", run)
@@ -391,8 +392,8 @@ def password_reset_start(request):
                 user = User.objects.get(username__exact=username)
                 key = str(random.randint(100000,999999))
                 request.session['resetkey'] = key
-                
-                from_addr = 'no-reply@run.wehrman.me'
+        
+                from_addr = 'run@wehrman.me'
                 to_addr = user.email
                 recipient_list = [to_addr]
                 subject = 'Password reset request'
@@ -408,19 +409,22 @@ def password_reset_start(request):
                     ' at The Runs, return to ' + short_uri +
                     ' and enter the key ' + key + 
                     ', or just click here: ' + full_uri)
-                
+            
                 send_mail(subject, body, from_addr, recipient_list)
-                
-                
+
                 log.info("Password reset email sent for %s to %s", user, user.email)
                 messages.success(request, 'An email has been sent to you with a key. ' +  
                     'Enter it below to reset your password.')
-                
+            
                 return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
+            except User.DoesNotExist: 
+                messages.error(request, "User '%s' not found." % username)
             except Exception as e: 
-                log.error(str(e))
-                return render_to_response('run/reset_start.html', 
-                    context_instance=RequestContext(request))
+                messages.error(request, "Unable to request password reset: %s", e)
+                log.error(e)
+        
+            return render_to_response('run/reset_start.html', 
+                context_instance=RequestContext(request))
         else: 
             return render_to_response('run/reset_start.html', 
                 context_instance=RequestContext(request))
@@ -643,6 +647,7 @@ def run_update(request):
             context_instance=RequestContext(request))
     
     run.set_calories() 
+    run.set_zone()
     run.save()
     
     reset_last_modified(user.id)

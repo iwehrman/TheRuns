@@ -317,6 +317,9 @@ def do_import(request):
     user = request.user
     if not user.is_authenticated(): 
         return redirect_to_login(request)
+    elif incomplete_profile(user):
+        messages.info(request, 'You must complete your profile before importing runs.')
+        return HttpResponseRedirect(reverse('run.views.userprofile_update'))
     else:
         if request.method == 'POST':
             form = ImportForm(request.POST, request.FILES)
@@ -324,7 +327,6 @@ def do_import(request):
                 erase = form.cleaned_data['erase_existing_data']
                 really = form.cleaned_data['really_erase']
                 runs = form.cleaned_data['data_file']
-                
                 
                 # delete existing runs if the user really wants to
                 if erase and really: 
@@ -341,8 +343,6 @@ def do_import(request):
                     reset_last_modified(user.id)
                     invalidate_aggregates(user, run.date)
                     
-                
-            
                 messages.success(request, "Data imported successfully.")
                 return HttpResponseRedirect(reverse('run.views.userprofile'))
         else:
@@ -523,12 +523,13 @@ def userprofile_update(request):
         pform = UserProfileForm(instance=profile)
 
     context = {'uform': uform, 'pform': pform}
-
-    
-
     return render_to_response('run/profile_edit.html', 
         context,
         context_instance=RequestContext(request))
+
+def incomplete_profile(user):
+    profile = user.get_profile()
+    return not (profile.gender and profile.weight and profile.resting_heart_rate and profile.birthday)
 
 ### Runs ###
         
@@ -553,22 +554,20 @@ def run_all(request):
                 context_instance=RequestContext(request))
 
 def run_new(request):
-    if not request.user.is_authenticated(): 
+    user = request.user
+    if not user.is_authenticated(): 
         return redirect_to_login(request)
     
-    p = request.user.get_profile()
-    s = Shoe.objects.filter(user=p.id)
-    context = {'profile': p, 'shoes': s}
-
-    return render_to_response('run/run_edit.html', 
-        context,
-        context_instance=RequestContext(request))
-    
-def run_detail(request, run_id):
-    if not request.user.is_authenticated(): 
-        return redirect_to_login(request)
-    
-    return HttpResponse("Hello run %s." %  run_id)
+    if incomplete_profile(user):
+        messages.info(request, 'You must complete your profile before adding a run.')
+        return HttpResponseRedirect(reverse('run.views.userprofile_update'))
+    else: 
+        p = user.get_profile()
+        s = Shoe.objects.filter(user=p.id)
+        context = {'profile': p, 'shoes': s}
+        return render_to_response('run/run_edit.html', 
+            context,
+            context_instance=RequestContext(request))
     
 def run_update(request): 
     if not request.user.is_authenticated(): 

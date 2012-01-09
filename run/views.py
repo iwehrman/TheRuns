@@ -133,20 +133,23 @@ def index_last_modified_user(request, user):
     """ 
     
     this_morning = datetime.datetime.now().replace(hour=0,minute=0,second=0)
-    
-    userid = user.id
-    key = get_lm_cache_key(userid)
-    lm = cache.get(key)
-    if not lm: 
-        lm = datetime.datetime.now()
-        cache.set(key, lm)
-      
-    if request.user.is_authenticated():
-        ll = request.user.last_login
-        if ll > lm: 
-           return max(this_morning, ll)
 
-    return max(this_morning, lm)
+    if user.is_anonymous():
+        return this_morning
+    else: 
+        userid = user.id
+        key = get_lm_cache_key(userid)
+        lm = cache.get(key)
+        if not lm: 
+            lm = datetime.datetime.now()
+            cache.set(key, lm)
+
+        if request.user.is_authenticated():
+            ll = request.user.last_login
+            if ll > lm: 
+                return max(this_morning, ll)
+
+        return max(this_morning, lm)
 
 def index_last_modified_username(request, username):
     user = User.objects.get(username=username)

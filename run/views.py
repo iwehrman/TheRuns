@@ -17,7 +17,7 @@ from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
-from run.forms import UserForm, UserProfileForm
+from run.forms import UserForm, UserProfileForm, ImportForm
 
 BASE_URI = "http://run.wehrman.me"
 
@@ -310,7 +310,45 @@ def redirect_to_login(request, reset_destination=True):
         
     return HttpResponseRedirect(reverse('run.views.do_login'))
 
-def export(request):
+def do_import(request):
+    user = request.user
+    if not user.is_authenticated(): 
+        return redirect_to_login(request)
+    else:
+        if request.method == 'POST':
+            form = ImportForm(request.POST, request.FILES)
+            if form.is_valid():
+                erase = form.cleaned_data['erase_existing_data']
+                really = form.cleaned_data['really_erase']
+                runs = form.cleaned_data['data_file']
+                
+                
+                # delete existing runs if the user really wants to
+                if erase and really: 
+                    existing = Run.objects.filter(user=user.id)
+                    existing.delete()
+                    
+                for run in runs: 
+                    run.user = user
+                    if not run.calories: 
+                        run.set_calories()
+                    log.debug("Importing run %s", run)
+                    run.save()
+                    
+                    reset_last_modified(user.id)
+                    invalidate_aggregates(user, run.date)
+                    
+                
+            
+                messages.success(request, "Data imported successfully.")
+                return HttpResponseRedirect(reverse('run.views.userprofile'))
+        else:
+            form = ImportForm()
+    
+        return render_to_response('run/import.html', {'form': form},
+            context_instance=RequestContext(request))
+
+def do_export(request):
     user = request.user
     if not user.is_authenticated(): 
         return redirect_to_login(request)

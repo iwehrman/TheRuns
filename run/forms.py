@@ -9,17 +9,17 @@ log = logging.getLogger(__name__)
 
 class UserProfileForm(ModelForm):
     birthday = DateField(widget=DateInput(format='%m/%d/%Y',
-        attrs={'class': 'span3', 'tabindex':'8'}), 
+        attrs={'class': 'span3', 'tabindex':'8', 'placeholder': '01/31/1970'}), 
         label='Birthdate')
     
     gender = NullBooleanField(widget=Select(attrs={'class': 'span2', 'tabindex': '6'}, 
         choices=((None, ''), (True, 'Male'), (False, 'Female'),)),
         label='Sex')
             
-    weight = CharField(widget=TextInput(attrs={'class': 'span2', 'tabindex': '7'}),
+    weight = CharField(widget=TextInput(attrs={'class': 'span2', 'tabindex': '7', 'placeholder': '123'}),
         label='Weight (lbs)')
         
-    resting_heart_rate = CharField(TextInput(attrs={'class': 'span2', 'tabindex': '9'}),
+    resting_heart_rate = CharField(widget=TextInput(attrs={'class': 'span2', 'tabindex': '9', 'placeholder': '75'}),
         label='Resting heart rate (b/min)')
         
     class Meta:

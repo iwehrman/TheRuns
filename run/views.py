@@ -533,7 +533,9 @@ def userprofile_update(request):
 
 def incomplete_profile(user):
     profile = user.get_profile()
-    return not (profile.gender and profile.weight and profile.resting_heart_rate and profile.birthday)
+    
+    return (not ((profile.gender != None) and profile.weight and 
+        profile.resting_heart_rate and profile.birthday))
 
 ### Runs ###
         

@@ -1,0 +1,19 @@
+{% block init %}
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
+
+<style type="text/css">
+	.zone-1 { color: green !important; }
+	.zone-2 { color: royalblue !important; }
+	.zone-3 { color: darkorange !important; }
+	.zone-4 { color: orangered !important; }
+	.zone-5 { color: firebrick !important; }
+</style>
+
+<script>
+	$(function () {
+		$("a[rel=twipsy]").twipsy({
+			live: true,
+		})
+	})
+</script>
+{% endblock init %}

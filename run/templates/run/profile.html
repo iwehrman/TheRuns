@@ -2,7 +2,11 @@
 
 {% block title %} The Runs: Profile {% endblock title %}
 
-{% block section-profile %}class="active"{%endblock%}
+{% block init %}
+{% include "run/run_table_init.html" %}
+{% endblock init %}
+
+{% block section-profile %}class="active"{% endblock %}
 
 {% block main_14 %}
 	<div class="row">

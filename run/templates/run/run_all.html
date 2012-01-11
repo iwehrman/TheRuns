@@ -2,6 +2,10 @@
 
 {% block title %} The Runs: All Runs {% endblock title %}
 
+{% block init %}
+{% include "run/run_table_init.html" %}
+{% endblock init %}
+
 {% block section-profile %}class="active"{%endblock%}
 
 {% block header %} 

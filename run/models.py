@@ -38,7 +38,10 @@ class UserProfile(models.Model):
             ", last_shoe: " + str(self.last_shoe) + ")")
         
     def maximum_heart_rate(self):
-        return 205.8 - (0.685 * float(self.age_in_years()))
+        if self.gender == True or self.gender == None: # men
+            return 205.8 - (0.685 * float(self.age_in_years()))
+        else: # women
+            return 206.0 - (0.88 * float(self.age_in_years()))
 
     def age_in_years(self): 
         td = date.today() - self.birthday

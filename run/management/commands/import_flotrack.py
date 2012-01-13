@@ -1,10 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
-from fit.run.models import Run, Shoe, UserProfile
-import json, csv
+from run.models import Run, Shoe, UserProfile
+import json, csv, decimal
 from datetime import datetime
 
 m_in_mi = 1609.344
+
+def Decimal(f): 
+    return decimal.Decimal(str(f))
 
 class Command(BaseCommand):
     args = '<username file.csv>'
@@ -43,7 +46,7 @@ class Command(BaseCommand):
                 d = run.set_duration(0,minutes,seconds)
                 self.stdout.write("Dur: " + str(d) + ', ')
                 
-                distance = float(row[3]) 
+                distance = Decimal(float(row[3]))
                 run.distance = distance
                 self.stdout.write("Dist: " + str(distance) + ', ')
                 

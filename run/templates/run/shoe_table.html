@@ -13,7 +13,27 @@
 	<tr>
     	<td>{{ shoe.make }}</td>
 		<td>{{ shoe.model }}</td>
-		<td>{{shoe.miles|floatformat:0}} mi</td>
+		<td>{% if shoe.miles <= 50 %}
+			<a href="#" class="zone-1" rel="twipsy" 
+				title="These shoes are still new. Break them in a little at a time.">
+			{% endif %}
+			{% if shoe.miles > 50 and shoe.miles <= 300 %}
+			<a href="#" class="zone-2" rel="twipsy" 
+				title="These shoes are in their prime. Go running!">
+			{% endif %}
+			{% if shoe.miles > 300 and shoe.miles <= 400 %}
+			<a href="#" class="zone-3" rel="twipsy" 
+				title="These shoes have some miles left, but start looking for a new pair.">
+			{% endif %}
+			{% if shoe.miles > 400 and shoe.miles <= 500 %}
+			<a href="#" class="zone-4" rel="twipsy" 
+				title="These shoes are nearly worn out. Start breaking in a new pair.">
+			{% endif %}
+			{% if shoe.miles > 500 %}
+			<a href="#" class="zone-5" rel="twipsy" 
+				title="These shoes are worn out, and should be retired.">
+			{% endif %}
+			{{shoe.miles|floatformat:0}} mi</a></td>
 		<td>{{shoe.active|yesno:"Yes,No"}}</td>
 		<td><a href="/shoe/retire/{{shoe.id}}">Retire</a></td>
 		<td><a href="/shoe/remove/{{shoe.id}}">Clear</a></td>

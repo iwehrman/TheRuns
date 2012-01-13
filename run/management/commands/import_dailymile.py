@@ -8,7 +8,7 @@ m_in_mi = 1609.344
 
 class Command(BaseCommand):
     args = '<username file.csv>'
-    help = 'Imports run data exported from DailyMile as a CVS file'
+    help = 'Imports run data exported from DailyMile as a CSV file'
 
     def handle(self, *args, **options):
 

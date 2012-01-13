@@ -187,7 +187,7 @@ class Run(models.Model):
     def set_zone(self):
         profile = self.user.get_profile()
 
-        if profile.birthday and profile.resting_heart_rate: 
+        if self.average_heart_rate and profile.birthday and profile.resting_heart_rate: 
             
             hr = self.average_heart_rate
             resthr = profile.resting_heart_rate

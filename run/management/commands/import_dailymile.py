@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
-from fit.run.models import Run, Shoe, UserProfile
+from run.models import Run, Shoe, UserProfile
 import json, csv
 from datetime import datetime
 

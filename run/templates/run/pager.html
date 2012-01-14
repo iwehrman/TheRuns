@@ -1,11 +1,19 @@
 {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">{% endif %}
 	Previous
 {% if page.has_previous %}</a>{% endif %}
-{% for i in page.paginator.page_range %}
+{% if range.0 != 1 %}
+	<a href="?page=1" style="padding: 5px">1</a>
+  	<span style="padding: 5px">...</span> 
+{% endif %}
+{% for i in range %}
 	{% if i == page.number %}<strong>{% endif %}
 	<a href="?page={{i}}" style="padding: 5px">{{i}}</a>
 	{% if i == page.number %}</strong>{% endif %}
 {% endfor %}
+{% if range.pop != page.paginator.num_pages %}
+	<span style="padding: 5px">...</span> 
+	<a href="?page={{page.paginator.num_pages}}" style="padding: 5px">{{page.paginator.num_pages}}</a>
+{% endif %}
 {% if page.has_next %}<a href="?page={{ page.next_page_number }}">{% endif %}
 	Next
 {% if page.has_next %}</a>{% endif %}

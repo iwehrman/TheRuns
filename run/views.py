@@ -538,6 +538,21 @@ def incomplete_profile(user):
         profile.resting_heart_rate and profile.birthday))
 
 ### Runs ###
+
+def page_range(page):
+    maximum = page.paginator.num_pages
+    lower = page.number - 5
+    upper = page.number + 5
+    
+    if lower < 1: 
+        upper = min(upper - lower, maximum)
+        lower = 1
+
+    if upper > maximum:
+        lower = max(1, lower - (upper - maximum))
+        upper = maximum
+    
+    return range(lower, upper + 1)
         
 def run_all(request):
     user = request.user
@@ -555,8 +570,9 @@ def run_all(request):
         except EmptyPage:
             runs = paginator.page(paginator.num_pages)
         finally: 
+            context = {'range': page_range(runs), 'runs': runs}
             return render_to_response('run/run_all.html', 
-                {'runs': runs,},
+                context,
                 context_instance=RequestContext(request))
 
 def run_new(request):
@@ -710,8 +726,9 @@ def shoe_all(request):
         except EmptyPage:
             shoes = paginator.page(paginator.num_pages)
         finally: 
+            context = {'range': page_range(shoes), 'shoes': shoes}
             return render_to_response('run/shoe_all.html', 
-                {'shoes': shoes,},
+                context, 
                 context_instance=RequestContext(request))
 
 def shoe_update(request): 

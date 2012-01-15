@@ -1,20 +1,37 @@
 {% block init %}
 <script src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-popover.js"></script>
 
 <style type="text/css">
-	.zone-1 { color: royalblue !important; text-decoration: none !important; }
-	.zone-2 { color: green !important; text-decoration: none !important; }
-	.zone-3 { color: darkorange !important; text-decoration: none !important; }
-	.zone-4 { color: orangered !important; text-decoration: none !important; }
-	.zone-5 { color: firebrick !important; text-decoration: none !important; }
+	.zone-any { 
+		text-decoration: none ! important; 
+		cursor: default ! important; 
+	}
+	
+	.zone-1 { color: royalblue !important; }
+	.zone-2 { color: green !important; }
+	.zone-3 { color: darkorange !important; }
+	.zone-4 { color: orangered !important; }
+	.zone-5 { color: firebrick !important; }
 </style>
 
 <script>
 	$(function () {
 		$("a[rel=twipsy]").twipsy({
 			live: true,
-			delayIn: 1000
+			delayIn: 750
 		})
 	})
+
+    $(function () {
+      $("a[rel=popover]")
+        .popover({
+          offset: 10, 
+		  placement: 'left'
+        })
+        .click(function(e) {
+          e.preventDefault()
+        })
+    })
 </script>
 {% endblock init %}

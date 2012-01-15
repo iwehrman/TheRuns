@@ -26,7 +26,7 @@
 			{% endif %}</td>
 		<td>{% if run.average_heart_rate %} 
 			{% if run.zone %}
-			<a href="#" class="zone-{{run.zone}}" rel="twipsy" 
+			<a href="#" class="zone-any zone-{{run.zone}}" rel="twipsy" 
 				title="{{run.zone_description|capfirst}} heart rate zone ({{run.zone}} of 5)">
 			{% endif %}
 			{{run.heart_rate_percent|floatformat:0}}%
@@ -42,7 +42,7 @@
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>
-		<td><a href="/run/remove/{{run.id}}">Clear</a></td>
+		<td><a href="/run/remove/{{run.id}}" rel="popover" title="Really?" data-content="Really delete this run?">Clear</a></td>
 	</tr>
 {% endfor %}
 </table>

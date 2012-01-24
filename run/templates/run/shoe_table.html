@@ -4,9 +4,9 @@
 			<th>Make</th>
 			<th>Model</th>
 			<th>Distance</th>
-			<th>Active?</th>
+			{% if show_clear %}<th>Active?</th>{% endif %}
 			<th><i>Retire</i>&nbsp;</th>
-			<th><i>Clear</i>&nbsp;</th>
+			{% if show_clear %}<th><i>Clear</i>&nbsp;</th>{% endif %}
 		</tr>
 	</thead>
 {% for shoe in shoelist %}
@@ -34,9 +34,10 @@
 				title="These shoes are worn out, and should be retired.">
 			{% endif %}
 			{{shoe.miles|floatformat:0}} mi</a></td>
-		<td>{{shoe.active|yesno:"Yes,No"}}</td>
-		<td><a href="/shoe/retire/{{shoe.id}}">Retire</a></td>
-		<td><a href="/shoe/remove/{{shoe.id}}">Clear</a></td>
+		{% if show_clear %}<td>{{shoe.active|yesno:"Yes,No"}}</td>{% endif %}
+		{% if shoe.active %}<td><a href="/shoe/retire/{{shoe.id}}">Retire</a></td>{% endif %}
+		{% if not shoe.active %}<td><a href="/shoe/activate/{{shoe.id}}">Activate</a></td>{% endif %}
+		{% if show_clear %}<td><a href="/shoe/remove/{{shoe.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
 </table>

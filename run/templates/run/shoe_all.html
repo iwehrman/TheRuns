@@ -8,10 +8,6 @@
 
 {% block section-profile %}class="active"{%endblock%}
 
-{% block header %} 
-	Howdy, {{ user.username }}!
-{% endblock header %}
-
 {% block main_14 %}
 
 	<div class="row">
@@ -26,7 +22,7 @@
 			</ul>
 		</div>
 	</div>
-	{% include "run/shoe_table.html" with shoelist=shoes.object_list only %}
+	{% include "run/shoe_table.html" with shoelist=shoes.object_list show_clear=1 %}
 	
 {% endblock main_14 %}
 

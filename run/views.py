@@ -867,3 +867,17 @@ def shoe_retire(request, shoe_id):
     log.info('Retired shoe for %s: %s', user, shoe)
     messages.success(request, "Shoe retired.")
     return HttpResponseRedirect(reverse('run.views.userprofile'))
+
+def shoe_activate(request, shoe_id):
+    user = request.user
+    if not user.is_authenticated(): 
+        return redirect_to_login(request)
+
+    shoe = get_object_or_404(Shoe, pk=shoe_id)
+    shoe.active = True
+    shoe.save()
+    reset_last_modified(shoe.user.id)
+
+    log.info('Activated shoe for %s: %s', user, shoe)
+    messages.success(request, "Shoe activated.")
+    return HttpResponseRedirect(reverse('run.views.userprofile'))

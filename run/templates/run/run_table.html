@@ -10,7 +10,7 @@
 			<th>HR %</th>
 			<th>Energy</th>
 			<th title="Distance run (in meters) per heartbeat">Yield</th>
-			<th><i>Clear</i></th>
+			{% if show_clear %}<th><i>Clear</i></th>{% endif %}
 		</tr>
 	</thead>
 {% for run in runlist %}
@@ -42,7 +42,7 @@
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>
-		<td><a href="/run/remove/{{run.id}}">Clear</a></td>
+		{% if show_clear %}<td><a href="/run/remove/{{run.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
 </table>

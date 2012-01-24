@@ -1,6 +1,5 @@
 {% block init %}
 <script src="{{ STATIC_URL }}bootstrap/js/bootstrap-twipsy.js"></script>
-<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-popover.js"></script>
 
 <style type="text/css">
 	.zone-any { 
@@ -22,16 +21,5 @@
 			delayIn: 750
 		})
 	})
-
-    $(function () {
-      $("a[rel=popover]")
-        .popover({
-          offset: 10, 
-		  placement: 'left'
-        })
-        .click(function(e) {
-          e.preventDefault()
-        })
-    })
 </script>
 {% endblock init %}

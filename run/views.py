@@ -114,7 +114,7 @@ def invalidate_cache(user, date):
     ags.delete()
     
     # invalidate first-date 
-    key = first_date_cache_key(user)
+    key = first_date_cache_key(user.id)
     first_date = cache.get(key)
     if first_date and first_date < date: 
         cache.delete(key)

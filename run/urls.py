@@ -11,6 +11,7 @@ urlpatterns = patterns('run.views',
     # Uncomment the next line to enable the admin:
     url(r'^$', 'index'),
     url(r'^u/(?P<username>.+)/$', 'index_user'),
+    url(r'^u/(?P<username>.+)/all$', 'all_user'),
     url(r'^login/$', 'do_login'),
     url(r'^logout/$', 'do_logout'),
     url(r'^reset_start/$', 'password_reset_start'),

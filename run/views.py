@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
+from django.db.models import Min
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -26,12 +27,19 @@ log = logging.getLogger(__name__)
 WEEK_AG_PREFIX = 'WEEK_AG'
 MONTH_AG_PREFIX = 'MONTH_AG'
 LM_PREFIX = 'LM'
+FIRST_PREFIX = 'FIRST'
 
-def get_ag_cache_key(prefix, userid, date): 
+ONE_DAY = timedelta(days=1)
+ONE_WEEK = timedelta(days=7)
+
+def ag_cache_key(prefix, userid, date): 
     return "%s_%d_%d_%d_%d" % (prefix, userid, date.year, date.month, date.day)
         
-def get_lm_cache_key(userid):
+def lm_cache_key(userid):
     return "%s_%d" % (LM_PREFIX,userid)
+    
+def first_date_cache_key(userid):
+    return "%s_%d" % (FIRST_PREFIX, userid)
 
 def aggregate_runs(user, first_day, last_day):
     duration = 0
@@ -91,21 +99,28 @@ def get_aggregate_from_db(user, first_date, last_date):
         raise Exception("Multiple agregates for %s at %s - %s" % 
             (user.username, first_date, last_date))
             
-def invalidate_aggregates(user, date):
+def invalidate_cache(user, date):
+    # invalidate aggregates
     ags = Aggregate.objects.filter(user=user.id,first_date__lte=date,
         last_date__gte=date)
     
-    week_keys = [get_ag_cache_key(WEEK_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    week_keys = [ag_cache_key(WEEK_AG_PREFIX,user.id,ag.first_date) for ag in ags]
     log.info("Evicting %s from week_cache", cache.get_many(week_keys))
     cache.delete_many(week_keys)
-    month_keys = [get_ag_cache_key(MONTH_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    month_keys = [ag_cache_key(MONTH_AG_PREFIX,user.id,ag.first_date) for ag in ags]
     log.info("Evicting %s from month_cache", cache.get_many(month_keys))
     cache.delete_many(month_keys)
 
     ags.delete()
+    
+    # invalidate first-date 
+    key = first_date_cache_key(user)
+    first_date = cache.get(key)
+    if first_date and first_date < date: 
+        cache.delete(key)
 
 def get_aggregate_generic(prefix, user, first_date, last_date): 
-    key = get_ag_cache_key(prefix, user.id, first_date)
+    key = ag_cache_key(prefix, user.id, first_date)
     ag = cache.get(key)
     if ag: 
         # log.debug("Aggregate CACHE HIT: %s" % ag)
@@ -138,7 +153,7 @@ def index_last_modified_user(request, user):
         return this_morning
     else: 
         userid = user.id
-        key = get_lm_cache_key(userid)
+        key = lm_cache_key(userid)
         lm = cache.get(key)
         if not lm: 
             lm = datetime.datetime.now()
@@ -159,53 +174,79 @@ def index_last_modified_default(request):
     return index_last_modified_user(request, request.user)
     
 def reset_last_modified(userid):
-    key = get_lm_cache_key(userid)
+    key = lm_cache_key(userid)
     cache.delete(key)
+    
+def surrounding_week(start):
+    last_monday = start - (ONE_DAY * start.weekday())
+    sunday = start + (ONE_DAY * (6 - start.weekday()))
+    return (last_monday, sunday)
 
-def __index_generic(request, user):
-    start = datetime.datetime.now()
+def get_aggregates_by_week(user, start, scale):
+    def get_previous_week(i): 
+        last_monday, sunday = surrounding_week(start - i * ONE_WEEK)
+        return get_week_aggregate(user, last_monday, sunday)
 
-    daydelta = timedelta(days=1)
-    weekdelta = timedelta(weeks=1)
-    weekdelta = timedelta(weeks=1)
-    today = date.today()
+    return map(get_previous_week, range(scale))
     
-    # find the the current week
-    last_monday = today - (daydelta * today.weekday())
-    sunday = today + (daydelta * (6 - today.weekday()))
-    ag = get_week_aggregate(user, last_monday, sunday)
-    all_weeks = [ag]
-    
-    
-    # aggregate runs for the previous 11 weeks
-    for i in range(11): 
-        sunday = last_monday - daydelta
-        last_monday = last_monday - weekdelta
-        ag = get_week_aggregate(user, last_monday, sunday)
-        all_weeks.append(ag)
-                
-    # aggregate runs for the previous 12 months
-    first_of_the_month = today.replace(day=1)
+def surrounding_month(start):
+    first_of_the_month = start.replace(day=1)
     if first_of_the_month.month == 12:
          last_of_the_month = (first_of_the_month
              .replace(month=1, year=(first_of_the_month.year + 1)))
     else: 
         last_of_the_month = (first_of_the_month
             .replace(month=(first_of_the_month.month + 1)))
-    last_of_the_month -= daydelta
-    ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
-    all_months = [ag]
+    last_of_the_month -= ONE_DAY
+    return (first_of_the_month, last_of_the_month)
     
-    for i in range(11): 
-        last_of_the_month = first_of_the_month - daydelta
-        if first_of_the_month.month == 1: 
-            first_of_the_month = (first_of_the_month
-                .replace(month=12, year=(first_of_the_month.year - 1)))
-        else: 
-            first_of_the_month = (first_of_the_month
-                .replace(month=(first_of_the_month.month - 1)))
-        ag = get_month_aggregate(user, first_of_the_month, last_of_the_month)
-        all_months.append(ag)
+def get_aggregates_by_month(user, start, scale):
+    def get_previous_month(i):
+        quotient, remainder = divmod(((start.month - 1) - i), 12)
+        newmonth = remainder + 1
+        newyear = start.year + quotient
+        newdate = start.replace(month=newmonth, year=newyear, day=1)
+        first, last = surrounding_month(newdate)
+        return get_month_aggregate(user, first, last)
+    
+    return map(get_previous_month, range(scale))
+    
+def weeks_in_range(first, last):
+    delta = first - last
+    weeks = delta.days / 7
+    if delta.days % 7: 
+        return weeks + 1
+    else: 
+        return weeks
+        
+def months_in_range(first, last):
+    print ("f=%s, l=%s" % (first, last))
+    years = first.year - last.year
+    months = ((first.month - last.month) + 1) % 12
+    print ("y=%d, m=%s" % (years, months))
+    
+    
+    if months: 
+        return (12 * (years - 1)) + months
+    else: 
+        return (12 * years) + months
+        
+        
+def __index_generic(request, user):
+    start = datetime.datetime.now()
+    today = date.today()
+    
+    scale = 12
+    if 'scale' in request.GET: 
+        try: 
+            ascale = int(request.GET['scale'])
+            if ascale > 0: 
+                scale = ascale
+        except ValueError as e: 
+            log.warn("Unable to parse scale: %s", e)
+
+    all_weeks = get_aggregates_by_week(user, today, scale)
+    all_months = get_aggregates_by_month(user, today, scale)
         
     log.debug('Index time for %s: %s', user, (datetime.datetime.now() - start))
         
@@ -258,7 +299,51 @@ def index(request):
     if not user.is_authenticated(): 
         return redirect_to_login(request)
     else: 
-        return __index_generic(request, user)
+        return HttpResponseRedirect(reverse('run.views.index_user', 
+            args=[user.username]))
+    
+def date_of_first_run(user):
+    key = first_date_cache_key(user.id)
+    date = cache.get(key)
+    if date:
+        log.debug("First date in cache: %s", date)
+    else:
+        date = Run.objects.filter(user=user.id).aggregate(Min('date'))['date__min']
+        log.debug("First date not in cache: %s", date)
+        cache.set(key, date)
+    return date
+    
+@cache_control(must_revalidate=True)
+@condition(etag_func=None,last_modified_func=index_last_modified_username)
+def all_user(request, username):
+    user = User.objects.get(username=username)
+    
+    start = datetime.datetime.now()
+    first = date_of_first_run(user)
+    today = date.today()
+    
+    if 'today' in request.GET: 
+        try: 
+            today = datetime.datetime.strptime(request.GET['today'], "%Y-%m-%d")
+        except ValueError as e: 
+            log.warn("Unable to parse today's date: %s", e)
+    
+    week_scale = weeks_in_range(today, first)
+    month_scale = months_in_range(today, first)
+    
+    all_weeks = get_aggregates_by_week(user, today, week_scale)
+    all_months = get_aggregates_by_month(user, today, month_scale)
+    
+    log.debug('Index (all) time for %s: %s', user, (datetime.datetime.now() - start))
+    
+    context = {'all_weeks': all_weeks,
+        'all_months': all_months,
+    }
+
+    return render_to_response('run/all.html', context, 
+        context_instance=RequestContext(request))
+
+    
     
 def do_login(request):
     if request.method == "GET":
@@ -342,7 +427,7 @@ def do_import(request):
                     run.save()
                     
                     reset_last_modified(user.id)
-                    invalidate_aggregates(user, run.date)
+                    invalidate_cache(user, run.date)
                     
                 messages.success(request, "Data imported successfully.")
                 return HttpResponseRedirect(reverse('run.views.userprofile'))
@@ -669,7 +754,7 @@ def run_update(request):
     run.save()
     
     reset_last_modified(user.id)
-    invalidate_aggregates(user, run.date)
+    invalidate_cache(user, run.date)
 
     if shoe: 
         shoe.miles += Decimal(run.distance)
@@ -693,7 +778,7 @@ def run_delete(request, run_id):
     run.delete()
     
     reset_last_modified(run.user.id)
-    invalidate_aggregates(run.user, run.date)
+    invalidate_cache(run.user, run.date)
     
     messages.success(request, "Deleted run.")
 

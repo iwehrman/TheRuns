@@ -286,6 +286,13 @@ def __index_generic(request, user):
     return render_to_response('run/index.html', context, 
         context_instance=RequestContext(request))
         
+def index_bounce(request):
+    user = request.user
+    if user.is_authenticated():
+        return HttpResponseRedirect(reverse('run.views.index_user',args=[user.username]))
+    else:
+        return redirect_to_login(request)
+        
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_username)
 def index_user(request, username):

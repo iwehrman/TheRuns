@@ -315,9 +315,12 @@ class Aggregate(models.Model):
     pace = models.CharField(max_length=10,blank=True, null=True)
     calories = models.PositiveIntegerField()
     distance = models.DecimalField(max_digits=9,decimal_places=3)
+    minimum = models.DecimalField(max_digits=9,decimal_places=3)
+    maximum = models.DecimalField(max_digits=9,decimal_places=3)
     average = models.DecimalField(max_digits=9,decimal_places=3)
     speed = models.DecimalField(max_digits=5,decimal_places=3)
     efficiency = models.DecimalField(max_digits=5,decimal_places=3)
+    heart_rate = models.IntegerField(blank=True, null=True)
     
         
     def __unicode__(self):

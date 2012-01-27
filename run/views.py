@@ -42,12 +42,17 @@ def first_date_cache_key(userid):
     return "%s_%d" % (FIRST_PREFIX, userid)
 
 def aggregate_runs(user, first_day, last_day):
+    MAX_CONST = 1000000 # ought to be enough for anyone 
+    
     duration = 0
     distance = 0
     total_distance_in_meters = 0
     hr_distance_in_meters = 0
+    hr_duration_in_seconds = 0
     heartbeats = 0
     calories = 0
+    minimum = MAX_CONST
+    maximum = 0
 
     runs = (Run.objects.filter(user=user.id)
         .filter(date__gte=first_day).filter(date__lte=last_day))
@@ -59,8 +64,16 @@ def aggregate_runs(user, first_day, last_day):
         calories += run.calories
         if run.average_heart_rate:
             hr_distance_in_meters += run.distance_in_meters()
+            hr_duration_in_seconds += run.duration_in_seconds()
             heartbeats += run.heartbeats()
-            
+        if run.distance < minimum: 
+            minimum = run.distance
+        if run.distance > maximum: 
+            maximum = run.distance
+
+    if minimum == MAX_CONST: 
+        minimum = 0
+
     if duration > 0: 
         speed = total_distance_in_meters / duration
     else:
@@ -71,9 +84,16 @@ def aggregate_runs(user, first_day, last_day):
     else: 
         average = 0
         
+    if hr_duration_in_seconds > 0: 
+        heart_rate = (heartbeats / hr_duration_in_seconds) * 60
+    else: 
+        heart_rate = 0
+        
     ag = Aggregate()
     ag.user = user
     ag.distance = distance
+    ag.minimum = minimum
+    ag.maximum = maximum 
     ag.average = average
     ag.pace = Run.compute_pace(duration, distance)
     ag.efficiency = Run.compute_efficiency(hr_distance_in_meters, heartbeats)
@@ -81,8 +101,8 @@ def aggregate_runs(user, first_day, last_day):
     ag.calories = calories
     ag.first_date = first_day
     ag.last_date = last_day
+    ag.heart_rate = heart_rate
     ag.save()
-        
     return ag
     
 def get_aggregate_from_db(user, first_date, last_date):

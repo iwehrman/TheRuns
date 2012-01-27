@@ -66,7 +66,7 @@ def obj_to_run(obj):
     run = Run()
     
     # try to parse date field
-    run.date = datetime.datetime.strptime(obj[_date], "%Y-%m-%d") 
+    run.date = datetime.datetime.strptime(obj[_date], "%Y-%m-%d").date()
 
     # try to parse the duration and distance fields
     run.duration = hms_to_time(0,0,int(obj[_duration]))

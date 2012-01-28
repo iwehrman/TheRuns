@@ -313,15 +313,15 @@ class Aggregate(models.Model):
     first_date = models.DateField()
     last_date = models.DateField()
     pace = models.CharField(max_length=10,blank=True, null=True)
-    calories = models.PositiveIntegerField()
+    calories = models.PositiveIntegerField(blank=True, null=True)
     distance = models.DecimalField(max_digits=9,decimal_places=3)
     minimum = models.DecimalField(max_digits=9,decimal_places=3)
     maximum = models.DecimalField(max_digits=9,decimal_places=3)
-    average = models.DecimalField(max_digits=9,decimal_places=3)
-    speed = models.DecimalField(max_digits=5,decimal_places=3)
-    efficiency = models.DecimalField(max_digits=5,decimal_places=3)
+    average = models.DecimalField(max_digits=9,decimal_places=3,blank=True, null=True)
+    speed = models.DecimalField(max_digits=5,decimal_places=3,blank=True, null=True)
+    efficiency = models.DecimalField(max_digits=5,decimal_places=3,blank=True, null=True)
     heart_rate = models.IntegerField(blank=True, null=True)
-    
+    beats_per_second = models.DecimalField(max_digits=5,decimal_places=3,blank=True, null=True)
         
     def __unicode__(self):
         return "%s: %s - %s" % (self.user.username, self.first_date, self.last_date)

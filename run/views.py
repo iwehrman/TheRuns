@@ -77,7 +77,7 @@ def aggregate_runs(user, first_day, last_day):
     if duration > 0: 
         speed = total_distance_in_meters / duration
     else:
-        speed = 0
+        speed = None
     
     if len(runs) > 0: 
         average = distance / len(runs)
@@ -85,9 +85,15 @@ def aggregate_runs(user, first_day, last_day):
         average = 0
         
     if hr_duration_in_seconds > 0: 
-        heart_rate = (heartbeats / hr_duration_in_seconds) * 60
+        beats_per_second = (heartbeats / hr_duration_in_seconds)
+        heart_rate = beats_per_second * 60
     else: 
-        heart_rate = 0
+        heart_rate = None
+        beats_per_second = None
+        
+    efficiency = Run.compute_efficiency(hr_distance_in_meters, heartbeats)
+    if not efficiency > 0: 
+        efficiency = None
         
     ag = Aggregate()
     ag.user = user
@@ -96,12 +102,13 @@ def aggregate_runs(user, first_day, last_day):
     ag.maximum = maximum 
     ag.average = average
     ag.pace = Run.compute_pace(duration, distance)
-    ag.efficiency = Run.compute_efficiency(hr_distance_in_meters, heartbeats)
+    ag.efficiency = efficiency
     ag.speed = speed
     ag.calories = calories
     ag.first_date = first_day
     ag.last_date = last_day
     ag.heart_rate = heart_rate
+    ag.beats_per_second = beats_per_second
     ag.save()
     return ag
     
@@ -149,6 +156,12 @@ def get_aggregate_generic(prefix, user, first_date, last_date):
         log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
             (user.username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
+        
+        # FIXME this should be done before putting the aggregates in the db
+        ag.avg_min = ag.average - ag.minimum
+        ag.max_avg = ag.maximum - ag.average
+        ag.tot_max = ag.distance - ag.maximum
+        
         cache.set(key, ag)
         return ag
 
@@ -358,14 +371,14 @@ def all_user(request, username):
     week_scale = weeks_in_range(today, first)
     month_scale = months_in_range(today, first)
     
-    all_weeks = get_aggregates_by_week(user, today, week_scale)
-    all_months = get_aggregates_by_month(user, today, month_scale)
+    if month_scale <= 12: 
+        all_ags = get_aggregates_by_week(user, today, week_scale)
+    else:
+        all_ags = get_aggregates_by_month(user, today, month_scale)
     
     log.debug('Index (all) time for %s: %s', user, (datetime.datetime.now() - start))
     
-    context = {'all_weeks': all_weeks,
-        'all_months': all_months,
-    }
+    context = {'all_ags': all_ags}
 
     return render_to_response('run/all.html', context, 
         context_instance=RequestContext(request))

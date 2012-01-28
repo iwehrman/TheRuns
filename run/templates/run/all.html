@@ -7,47 +7,58 @@
 </script>
 <script type="text/javascript">
     
-	function drawVis(rows, domain) {
+	function drawDistance() {
 		// Create and populate the data table.
 
 		var data = new google.visualization.DataTable();
-		data.addColumn('string', domain); 
-		data.addColumn('number', 'Yield (m/b)'); 
-		data.addColumn('number', 'Speed (m/s)'); 
-		data.addColumn({type:'string', role:'tooltip'}); // annotation role col.
-		data.addColumn('number', 'Total Distance (mi)'); 
-		data.addColumn('number', 'Avg. Distance (mi)'); 
-		data.addRows(rows);
+		data.addColumn('string', 'Distance'); 
+		data.addColumn('number', 'Total (mi)');
+		data.addColumn('number', 'Avg. (mi)'); 
+		data.addColumn({type:'number', role:'interval'});
+		data.addColumn({type:'number', role:'interval'});
 
+		var rowData = [
+		{% for ag in all_ags reversed %}
+		['{{ag.first_date|date:"n/y"}}', 
+			{{ag.distance|floatformat:2}},
+			{{ag.average|floatformat:2}},
+			{{ag.minimum|floatformat:2}},
+			{{ag.maximum|floatformat:2}},
+		],
+		{% endfor %}
+			];
+		data.addRows(rowData);
 
         // Create and draw the visualization.
-        var ac = new google.visualization.ComboChart(document.getElementById('visualization-' + domain));
+        var ac = new google.visualization.ComboChart(document.getElementById('visualization-distance'));
 		var options = {
 			backgroundColor: '#fefbf1',
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 820,
-			height: 350,
+			height: 380,
 			curveType: 'function',
 			interpolateNulls: true,
+			isStacked: false,
+			legend: {position: 'top'},
 			hAxis: {
 				textStyle: {color: 'grey', fontName:'sans-serif', fontSize:12}},
 			series: {
-				0: {type: "line", targetAxisIndex: 0, color: '#d33682', lineWidth: 3},
-				1: {type: "line", targetAxisIndex: 0, color: '#2aa198', lineWidth: 3},
-				2: {type: "bars", targetAxisIndex: 1, color: '#ccc'}, 
-				3: {type: "bars", targetAxisIndex: 1, color: '#93a1a1'}, 
+				0: {type: "bars", targetAxisIndex: 0, color: '#aaa'}, 
+				1: {type: "lines", targetAxisIndex: 1, color: '#2aa198', lineWidth: 3}, 
+				
 			},
 			vAxes:{
-				0:{
-					title:'Efficiency',
+				0:{	
+					logScale: true,
+					title:'Total',
 					textStyle:{color: 'grey'}, 
-					logScale: true, 
-					baselineColor: '#93a1a1',
-				},
+				}
+			},
+			vAxes:{
 				1:{	
 					logScale: true,
-					title:'Distance',
+					title:'Average',
 					textStyle:{color: 'grey'}, 
 				}
 			},
@@ -55,42 +66,68 @@
         ac.draw(data, options);
 	}
 	
-	function drawWeeks() {
+	function drawEfficiency() {
+		// Create and populate the data table.
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Efficiency'); 
+		data.addColumn('number', 'Yield'); 
+		data.addColumn('number', 'Speed');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Heart rate'); 
+		data.addColumn({type:'string', role:'tooltip'});
+
 		var rowData = [
-			//['Week','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
-		{% for week in all_weeks reversed %}
-			['{{week.first_date|date:"n/j"}}', 
-			  {{week.efficiency|floatformat:3}}, 
-			  {{week.speed|floatformat:3}},
-			  'Pace: {{week.pace}}',
-			  {{week.distance|floatformat:2}},
-	  		  {{week.average|floatformat:2}},
-			],
+		{% for ag in all_ags reversed %}
+		['{{ag.first_date|date:"n/y"}}', 
+			{{ag.efficiency|floatformat:2}},
+			{{ag.speed|floatformat:2}},
+			'Pace: {{ag.pace}}/mi',
+			{{ag.beats_per_second|floatformat:2}},
+			'Heart rate: {{ag.heart_rate|floatformat:0}} b/m',
+		],
 		{% endfor %}
-			]
-			
-		drawVis(rowData, 'weeks');
-	}
-	
-	function drawMonths() {
-		var rowData = [
-			//['Month','Yield (m/b)','Speed (m/s)','Total Distance (mi)','Avg. Distance (mi)'],
-		{% for month in all_months reversed %}
-			['{{month.first_date|date:"n/y"}}', 
-			  {{month.efficiency|floatformat:3}}, 
-			  {{month.speed|floatformat:3}},
-			  'Pace: {{month.pace}}',
-			  {{month.distance|floatformat:2}},
-     	      {{month.average|floatformat:2}},
-			],
-		{% endfor %}
-			]
-		
-		drawVis(rowData, 'months');
+			];
+		data.addRows(rowData);
+
+        // Create and draw the visualization.
+        var ac = new google.visualization.ComboChart(document.getElementById('visualization-efficiency'));
+		var options = {
+			backgroundColor: '#fefbf1',
+			fontSize : 14,
+			fontName : 'sans-serif',
+			width: 820,
+			height: 380,
+			curveType: 'function',
+			interpolateNulls: true,
+			legend: {position: 'top'},
+			hAxis: {
+				textStyle: {color: 'grey', fontName:'sans-serif', fontSize:12}},
+			series: {
+				0: {type: "lines", targetAxisIndex: 1, color: '#aaa', lineWidth: 3}, 
+				1: {type: "lines", targetAxisIndex: 0, color: '#2aa198', lineWidth: 3}, 
+				2: {type: "lines", targetAxisIndex: 0, color: '#d33682', lineWidth: 3}, 
+			},
+			vAxes:{
+				0:{	
+					logScale: true,
+					title:'Meters-per',
+					textStyle:{color: 'grey'}, 
+				}
+			},
+			vAxes:{
+				1:{	
+					logScale: true,
+					title:'Yield',
+					textStyle:{color: 'grey'}, 
+				}
+			},
+		};
+        ac.draw(data, options);
 	}
 
-	google.setOnLoadCallback(drawWeeks);
-	google.setOnLoadCallback(drawMonths);
+	google.setOnLoadCallback(drawDistance);
+	google.setOnLoadCallback(drawEfficiency);
 </script>
 {% endblock init %}
 
@@ -100,12 +137,11 @@
 
 {% block main_14 %}
 
-<h2>All weeks:</h2>
+<h2>Distance:</h2>
 
-<div id="visualization-weeks" style="width: 820px; height: 350px;"></div>
+<div id="visualization-distance"></div>
 		
-<h2>All months:</h2>
-		
-<div id="visualization-months" style="width: 820px; height: 350px;"></div>
-		
+<h2>Efficiency:</h2>
+
+<div id="visualization-efficiency"></div>
 {% endblock main_14 %}

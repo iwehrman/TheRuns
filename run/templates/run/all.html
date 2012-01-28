@@ -36,7 +36,7 @@
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 820,
-			height: 380,
+			height: 360,
 			curveType: 'function',
 			interpolateNulls: true,
 			isStacked: false,
@@ -95,7 +95,7 @@
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 820,
-			height: 380,
+			height: 360,
 			curveType: 'function',
 			interpolateNulls: true,
 			legend: {position: 'top'},
@@ -136,11 +136,11 @@
 
 {% block main_14 %}
 
-<h2>Distance:</h2>
+<h2>Distance <a href="?by={{other}}">by {{by}}</a>:</h2>
 
-<div id="visualization-distance"></div>
+<div id="visualization-distance" style="width: 820px; height: 360px;"></div>
 		
-<h2>Efficiency:</h2>
+<h2>Efficiency <a href="?by={{other}}">by {{by}}</a>:</h2>
 
-<div id="visualization-efficiency"></div>
+<div id="visualization-efficiency" style="width: 820px; height: 360px;"></div>
 {% endblock main_14 %}

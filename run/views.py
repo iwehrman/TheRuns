@@ -342,9 +342,7 @@ def index(request):
 def date_of_first_run(user):
     key = first_date_cache_key(user.id)
     date = cache.get(key)
-    if date:
-        log.debug("First date in cache: %s", date)
-    else:
+    if not date:
         date = Run.objects.filter(user=user.id).aggregate(Min('date'))['date__min']
         log.debug("First date not in cache: %s", date)
         cache.set(key, date)
@@ -367,20 +365,31 @@ def all_user(request, username):
     
     week_scale = weeks_in_range(today, first)
     month_scale = months_in_range(today, first)
-    
-    if month_scale <= 12: 
+
+    if 'by' in request.GET and request.GET['by'] == 'week': 
+        by = 'week'
+        other = 'month'
+        all_ags = get_aggregates_by_week(user, today, week_scale)
+    elif 'by' in request.GET and request.GET['by'] == 'month': 
+        by = 'month'
+        other = 'week'
+        all_ags = get_aggregates_by_month(user, today, month_scale)
+    elif month_scale <= 12: 
+        by = 'week'
+        other = 'month'
         all_ags = get_aggregates_by_week(user, today, week_scale)
     else:
+        by = 'month'
+        other = 'week'
         all_ags = get_aggregates_by_month(user, today, month_scale)
+        
     
     log.debug('Index (all) time for %s: %s', user, (datetime.datetime.now() - start))
     
-    context = {'all_ags': all_ags}
+    context = {'all_ags': all_ags, 'by': by, 'other': other}
 
     return render_to_response('run/all.html', context, 
         context_instance=RequestContext(request))
-
-    
     
 def do_login(request):
     if request.method == "GET":

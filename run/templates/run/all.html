@@ -44,7 +44,7 @@
 			hAxis: {
 				textStyle: {color: 'grey', fontName:'sans-serif', fontSize:12}},
 			series: {
-				0: {type: "bars", targetAxisIndex: 0, color: '#ccc'}, 
+				0: {type: "bars", targetAxisIndex: 0, color: '#bbb'}, 
 				1: {type: "lines", targetAxisIndex: 1, color: '#2aa198', lineWidth: 3}, 
 				
 			},
@@ -53,9 +53,7 @@
 					logScale: true,
 					title:'Total',
 					textStyle:{color: 'grey'}, 
-				}
-			},
-			vAxes:{
+				},
 				1:{	
 					logScale: true,
 					title:'Average',
@@ -74,7 +72,7 @@
 		data.addColumn('number', 'Yield'); 
 		data.addColumn('number', 'Speed');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart rate'); 
+		data.addColumn('number', 'Heart Rate'); 
 		data.addColumn({type:'string', role:'tooltip'});
 
 		var rowData = [
@@ -104,24 +102,25 @@
 			hAxis: {
 				textStyle: {color: 'grey', fontName:'sans-serif', fontSize:12}},
 			series: {
-				0: {type: "lines", targetAxisIndex: 1, color: '#ccc', lineWidth: 3}, 
+				0: {type: "lines", targetAxisIndex: 1, color: '#aaa', lineWidth: 3}, 
 				1: {type: "lines", targetAxisIndex: 0, color: '#2aa198', lineWidth: 3}, 
 				2: {type: "lines", targetAxisIndex: 0, color: '#d33682', lineWidth: 3}, 
 			},
 			vAxes:{
 				0:{	
 					logScale: true,
-					title:'Meters-per',
+					title:'Speed & Heart Rate',
 					textStyle:{color: 'grey'}, 
-				}
-			},
-			vAxes:{
+					baseline: 1.0
+				},
 				1:{	
 					logScale: true,
 					title:'Yield',
 					textStyle:{color: 'grey'}, 
-				}
+					baselineColor: 'grey',
+				},
 			},
+			
 		};
         ac.draw(data, options);
 	}

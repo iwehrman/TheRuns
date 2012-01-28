@@ -157,10 +157,10 @@ def get_aggregate_generic(prefix, user, first_date, last_date):
             (user.username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
         
-        # FIXME this should be done before putting the aggregates in the db
-        ag.avg_min = ag.average - ag.minimum
-        ag.max_avg = ag.maximum - ag.average
-        ag.tot_max = ag.distance - ag.maximum
+        # # FIXME this should be done before putting the aggregates in the db
+        # ag.avg_min = ag.average - ag.minimum
+        # ag.max_avg = ag.maximum - ag.average
+        # ag.tot_max = ag.distance - ag.maximum
         
         cache.set(key, ag)
         return ag
@@ -253,11 +253,8 @@ def weeks_in_range(first, last):
         return weeks
         
 def months_in_range(first, last):
-    print ("f=%s, l=%s" % (first, last))
     years = first.year - last.year
     months = ((first.month - last.month) + 1) % 12
-    print ("y=%d, m=%s" % (years, months))
-    
     
     if months: 
         return (12 * (years - 1)) + months

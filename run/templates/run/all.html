@@ -19,7 +19,7 @@
 
 		var rowData = [
 		{% for ag in all_ags reversed %}
-		['{{ag.first_date|date:"j/n/y"}}', 
+		['{{ag.first_date|date:"n/j/y"}}', 
 			{{ag.distance|floatformat:2}},
 			{{ag.average|floatformat:2}},
 			{{ag.minimum|floatformat:2}},
@@ -69,15 +69,15 @@
 
 		var data = new google.visualization.DataTable();
 		data.addColumn('string', 'Efficiency'); 
-		data.addColumn('number', 'Yield'); 
-		data.addColumn('number', 'Speed');
+		data.addColumn('number', 'Yield (m/b)'); 
+		data.addColumn('number', 'Speed (m/s)');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart Rate'); 
+		data.addColumn('number', 'Heart Rate (b/s)'); 
 		data.addColumn({type:'string', role:'tooltip'});
 
 		var rowData = [
 		{% for ag in all_ags reversed %}
-		['{{ag.first_date|date:"j/n/y"}}', 
+		['{{ag.first_date|date:"n/j/y"}}', 
 			{{ag.efficiency|floatformat:2}},
 			{{ag.speed|floatformat:2}},
 			'Pace: {{ag.pace}}/mi',

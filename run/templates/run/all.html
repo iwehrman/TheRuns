@@ -19,7 +19,7 @@
 
 		var rowData = [
 		{% for ag in all_ags reversed %}
-		['{{ag.first_date|date:"n/j/y"}}', 
+		['{{ag.first_date|date:format}}', 
 			{{ag.distance|floatformat:2}},
 			{{ag.average|floatformat:2}},
 			{{ag.minimum|floatformat:2}},
@@ -77,12 +77,12 @@
 
 		var rowData = [
 		{% for ag in all_ags reversed %}
-		['{{ag.first_date|date:"n/j/y"}}', 
+		['{{ag.first_date|date:format}}', 
 			{{ag.efficiency|floatformat:2}},
 			{{ag.speed|floatformat:2}},
-			'Pace: {{ag.pace}}/mi',
+			'{{ag.first_date|date:format}}: {{ag.pace}}/mi pace',
 			{{ag.beats_per_second|floatformat:2}},
-			'Heart rate: {{ag.heart_rate|floatformat:0}} b/m',
+			'{{ag.first_date|date:format}}: {{ag.heart_rate|floatformat:0}} b/m heart rate',
 		],
 		{% endfor %}
 			];

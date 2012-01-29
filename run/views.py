@@ -353,6 +353,8 @@ def date_of_first_run(user):
 def all_user(request, username):
     user = User.objects.get(username=username)
     
+    sameuser = (request.user == user)
+    
     start = datetime.datetime.now()
     first = date_of_first_run(user)
     today = date.today()
@@ -369,24 +371,33 @@ def all_user(request, username):
     if 'by' in request.GET and request.GET['by'] == 'week': 
         by = 'week'
         other = 'month'
+        format = 'n/j/y'
         all_ags = get_aggregates_by_week(user, today, week_scale)
     elif 'by' in request.GET and request.GET['by'] == 'month': 
         by = 'month'
         other = 'week'
+        format = 'n/y'
         all_ags = get_aggregates_by_month(user, today, month_scale)
     elif month_scale <= 12: 
         by = 'week'
         other = 'month'
+        format = 'n/j/y'
         all_ags = get_aggregates_by_week(user, today, week_scale)
     else:
         by = 'month'
         other = 'week'
+        format = 'n/y'
         all_ags = get_aggregates_by_month(user, today, month_scale)
         
     
     log.debug('Index (all) time for %s: %s', user, (datetime.datetime.now() - start))
     
-    context = {'all_ags': all_ags, 'by': by, 'other': other}
+    context = {'sameuser': sameuser,
+        'all_ags': all_ags, 
+        'by': by, 
+        'other': other, 
+        'format': format
+    }
 
     return render_to_response('run/all.html', context, 
         context_instance=RequestContext(request))

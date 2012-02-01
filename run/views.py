@@ -254,12 +254,11 @@ def weeks_in_range(first, last):
         
 def months_in_range(first, last):
     years = first.year - last.year
-    months = ((first.month - last.month) + 1) % 12
+    months = first.month - last.month
+    ran = (12 * years) + months + 1
+    log.debug("Months in range (%s - %s): %d", last, first, ran)
     
-    if months: 
-        return (12 * (years - 1)) + months
-    else: 
-        return (12 * years) + months
+    return ran
         
         
 def __index_generic(request, user):

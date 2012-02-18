@@ -99,7 +99,7 @@ class Run(models.Model):
             return formatted_time(hms_to_time(0, 0, pace))
         else:
             return None
-        
+            
     def pace(self):
         return Run.compute_pace(self.duration_in_seconds(), self.distance)
         
@@ -109,6 +109,9 @@ class Run(models.Model):
         
     def distance_in_meters(self):
         return self.distance * meters_per_mile
+
+    def speed(self):
+        return self.distance_in_meters() / self.duration_in_seconds()
         
     @staticmethod
     def compute_efficiency(distance_in_meters, heartbeats):

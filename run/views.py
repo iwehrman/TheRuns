@@ -401,6 +401,23 @@ def all_user(request, username):
     return render_to_response('run/all.html', context, 
         context_instance=RequestContext(request))
     
+@cache_control(must_revalidate=True)
+@condition(etag_func=None,last_modified_func=index_last_modified_username)
+def yield_user(request, username):
+    user = User.objects.get(username=username)
+    
+    start = datetime.datetime.now()
+    first = date_of_first_run(user)
+    
+    runs = Run.objects.filter(user=user.id,average_heart_rate__gt=0).order_by('-date')
+    
+    context = {
+        'runs': runs
+    }
+
+    return render_to_response('run/yield.html', context, 
+        context_instance=RequestContext(request))
+    
 def do_login(request):
     if request.method == "GET":
         if 'destination' in request.session:

@@ -1,0 +1,60 @@
+{% extends "run/base_14.html" %}
+
+{% block init %}
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+	google.load('visualization', '1', {packages: ['corechart']});
+</script>
+<script type="text/javascript">
+    
+	function drawSpeed() {
+		// Create and populate the data table.
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('number', 'Speed'); 
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+
+		var rowData = [
+		{% for run in runs %}
+		[{{run.speed|floatformat:3}}, 
+			{{run.efficiency|floatformat:2}},
+			'Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+		],
+		{% endfor %}
+			];
+		data.addRows(rowData);
+
+        // Create and draw the visualization.
+        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-speed'));
+		var options = {
+			backgroundColor: '#fefbf1',
+			colors: ['#2aa198'],
+			fontSize : 14,
+			fontName : 'sans-serif',
+			width: 840,
+			height: 360,
+			legend: 'none',
+			pointSize: 5,
+			vAxis: {title: 'Yield (m/hb)'},
+			hAxis: {title: 'Speed (m/s)'},
+		};
+        ac.draw(data, options);
+	}
+	
+	google.setOnLoadCallback(drawSpeed);
+
+</script>
+{% endblock init %}
+
+{% block title %} The Runs: Yield {% endblock title %}
+
+{% block section-home %}{% if sameuser %}class="active"{% endif %}{%endblock%}
+
+{% block main_14 %}
+
+<h2>Yield vs. speed</a>:</h2>
+
+<div id="visualization-speed" style="width: 820px; height: 360px;"></div>
+
+{% endblock main_14 %}

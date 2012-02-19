@@ -12,28 +12,82 @@
 
 		var data = new google.visualization.DataTable();
 		data.addColumn('number', 'Speed'); 
-		data.addColumn('number', 'Yield');
+		data.addColumn('number', 'Yield (1)');
 		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield (2)');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield (3)');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield (4)');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield (5)');
+		data.addColumn({type:'string', role:'tooltip'});
+		
+		
 
 		var rowData = [
-		{% for run in runs %}
+		{% for run in runs_1 %}
 		[{{run.speed|floatformat:3}}, 
 			{{run.efficiency|floatformat:2}},
-			'Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+			'Date: {{run.date}}; Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+			null, null,
+			null, null,
+			null, null,
+			null, null,
 		],
 		{% endfor %}
-			];
+		{% for run in runs_2 %}
+		[{{run.speed|floatformat:3}}, 
+			null, null,
+			{{run.efficiency|floatformat:2}},
+			'Date: {{run.date}}; Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+			null, null,
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_3 %}
+		[{{run.speed|floatformat:3}}, 
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:2}},
+			'Date: {{run.date}}; Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_4 %}
+		[{{run.speed|floatformat:3}}, 
+			null, null,
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:2}},
+			'Date: {{run.date}}; Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_5 %}
+		[{{run.speed|floatformat:3}}, 
+			null, null,
+			null, null,
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:2}},
+			'Date: {{run.date}}; Yield: {{run.efficiency|floatformat:3}}; Pace: {{run.pace}}',
+		],
+		{% endfor %}
+		];
 		data.addRows(rowData);
 
         // Create and draw the visualization.
         var ac = new google.visualization.ScatterChart(document.getElementById('visualization-speed'));
 		var options = {
 			backgroundColor: '#fefbf1',
-			colors: ['#2aa198'],
+			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 840,
-			height: 360,
+			height: 380,
 			legend: 'none',
 			pointSize: 5,
 			vAxis: {title: 'Yield (m/hb)'},
@@ -55,6 +109,6 @@
 
 <h2>Yield vs. speed</a>:</h2>
 
-<div id="visualization-speed" style="width: 820px; height: 360px;"></div>
+<div id="visualization-speed" style="width: 840px; height: 380px;"></div>
 
 {% endblock main_14 %}

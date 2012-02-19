@@ -406,13 +406,26 @@ def all_user(request, username):
 def yield_user(request, username):
     user = User.objects.get(username=username)
     
-    start = datetime.datetime.now()
-    first = date_of_first_run(user)
+    today = date.today()
+    one_month = 4 * ONE_WEEK
+    date_1 = today - one_month
+    date_2 = today - (3 * one_month) 
+    date_3 = today - (6 * one_month) 
+    date_4 = today - (12 * one_month) 
     
-    runs = Run.objects.filter(user=user.id,average_heart_rate__gt=0).order_by('-date')
+    all_runs = Run.objects.filter(user=user.id,average_heart_rate__gt=0)
+    runs_5 = all_runs.filter(date__gte=date_1)
+    runs_4 = all_runs.filter(date__lt=date_1,date__gte=date_2)
+    runs_3 = all_runs.filter(date__lt=date_2,date__gte=date_3)
+    runs_2 = all_runs.filter(date__lt=date_3,date__gte=date_4)
+    runs_1 = all_runs.filter(date__lt=date_4)
     
     context = {
-        'runs': runs
+        'runs_1': runs_1,
+        'runs_2': runs_2,
+        'runs_3': runs_3,
+        'runs_4': runs_4,
+        'runs_5': runs_5,
     }
 
     return render_to_response('run/yield.html', context, 

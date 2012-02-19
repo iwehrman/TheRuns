@@ -405,6 +405,7 @@ def all_user(request, username):
 @condition(etag_func=None,last_modified_func=index_last_modified_username)
 def yield_user(request, username):
     user = User.objects.get(username=username)
+    sameuser = (request.user == user)
     
     today = date.today()
     one_month = 4 * ONE_WEEK
@@ -420,7 +421,7 @@ def yield_user(request, username):
     runs_2 = all_runs.filter(date__lt=date_3,date__gte=date_4)
     runs_1 = all_runs.filter(date__lt=date_4)
     
-    context = {
+    context = { 'sameuser': sameuser,
         'runs_1': runs_1,
         'runs_2': runs_2,
         'runs_3': runs_3,

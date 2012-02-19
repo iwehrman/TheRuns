@@ -7,24 +7,22 @@
 </script>
 <script type="text/javascript">
     
-	function drawSpeed() {
+	function drawYieldSpeed() {
 		// Create and populate the data table.
 
 		var data = new google.visualization.DataTable();
 		data.addColumn('number', 'Speed'); 
-		data.addColumn('number', 'Yield (1)');
+		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Yield (2)');
+		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Yield (3)');
+		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Yield (4)');
+		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Yield (5)');
+		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
 		
-		
-
 		var rowData = [
 		{% for run in runs_1 %}
 		[{{run.speed|floatformat:3}}, 
@@ -80,7 +78,7 @@
 		data.addRows(rowData);
 
         // Create and draw the visualization.
-        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-speed'));
+        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-yield-speed'));
 		var options = {
 			backgroundColor: '#fefbf1',
 			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
@@ -96,19 +94,203 @@
         ac.draw(data, options);
 	}
 	
-	google.setOnLoadCallback(drawSpeed);
+	function drawHRDistance() {
+		// Create and populate the data table.
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('number', 'Distance'); 
+		data.addColumn('number', 'Heart rate');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Heart rate');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Heart rate');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Heart rate');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Heart rate');
+		data.addColumn({type:'string', role:'tooltip'});
+		
+		var rowData = [
+		{% for run in runs_1 %}
+		[{{run.distance}}, 
+			{{run.average_heart_rate}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
+			null, null,
+			null, null,
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_2 %}
+		[{{run.distance}}, 
+			null, null,
+			{{run.average_heart_rate}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
+			null, null,
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_3 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			{{run.average_heart_rate}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_4 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			null, null,
+			{{run.average_heart_rate}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_5 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			null, null,
+			null, null,
+			{{run.average_heart_rate}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
+		],
+		{% endfor %}
+		];
+		
+		data.addRows(rowData);
+
+        // Create and draw the visualization.
+        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-hr-distance'));
+		var options = {
+			backgroundColor: '#fefbf1',
+			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
+			fontSize : 14,
+			fontName : 'sans-serif',
+			width: 840,
+			height: 380,
+			legend: 'none',
+			pointSize: 5,
+			vAxis: {title: 'Heart rate (hb/min)'},
+			hAxis: {title: 'Distance (mi)'},
+		};
+        ac.draw(data, options);
+	}
+	
+	function drawYieldDistance() {
+		// Create and populate the data table.
+
+		var data = new google.visualization.DataTable();
+		data.addColumn('number', 'Distance'); 
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+		data.addColumn('number', 'Yield');
+		data.addColumn({type:'string', role:'tooltip'});
+		
+		var rowData = [
+		{% for run in runs_1 %}
+		[{{run.distance}}, 
+			{{run.efficiency|floatformat:3}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			null, null,
+			null, null,
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_2 %}
+		[{{run.distance}}, 
+			null, null,
+			{{run.efficiency|floatformat:3}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			null, null,
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_3 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:3}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			null, null,
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_4 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:3}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			null, null,
+		],
+		{% endfor %}
+		{% for run in runs_5 %}
+		[{{run.distance}}, 
+			null, null,
+			null, null,
+			null, null,
+			null, null,
+			{{run.efficiency|floatformat:3}},
+			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+		],
+		{% endfor %}
+		];
+		
+		data.addRows(rowData);
+
+        // Create and draw the visualization.
+        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-yield-distance'));
+		var options = {
+			backgroundColor: '#fefbf1',
+			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
+			fontSize : 14,
+			fontName : 'sans-serif',
+			width: 840,
+			height: 380,
+			legend: 'none',
+			pointSize: 5,
+			vAxis: {title: 'Yield (m/hb)'},
+			hAxis: {title: 'Distance (mi)'},
+		};
+        ac.draw(data, options);
+	}
+	
+	google.setOnLoadCallback(drawYieldSpeed);
+	google.setOnLoadCallback(drawYieldDistance);
+	google.setOnLoadCallback(drawHRDistance);
+	
 
 </script>
 {% endblock init %}
 
-{% block title %} The Runs: Yield {% endblock title %}
+{% block title %} The Runs: Correlative Charts {% endblock title %}
 
 {% block section-home %}{% if sameuser %}class="active"{% endif %}{%endblock%}
 
 {% block main_14 %}
 
 <h2>Yield vs. speed</a>:</h2>
+<div id="visualization-yield-speed" style="width: 840px; height: 380px;"></div>
 
-<div id="visualization-speed" style="width: 840px; height: 380px;"></div>
+<h2>Heart rate vs. distance</a>:</h2>
+<div id="visualization-yield-distance" style="width: 840px; height: 380px;"></div>
+
+<h2>Yield vs. distance</a>:</h2>
+<div id="visualization-hr-distance" style="width: 840px; height: 380px;"></div>
 
 {% endblock main_14 %}

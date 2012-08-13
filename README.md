@@ -1,3 +1,4 @@
-# README
-Yo, this is the readme file for this repository.  Awesome.
+Python package dependencies: 
 
+1. python-memcached
+2. gunicorn

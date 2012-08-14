@@ -81,7 +81,7 @@
         var ac = new google.visualization.ScatterChart(document.getElementById('visualization-yield-speed'));
 		var options = {
 			backgroundColor: '#fefbf1',
-			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
+			colors: ['#78b6b5','#258F87', '#207A73', '#1B6863', '#124845'],
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 840,
@@ -94,99 +94,11 @@
         ac.draw(data, options);
 	}
 	
-	function drawHRDistance() {
+	function drawYieldHR() {
 		// Create and populate the data table.
 
 		var data = new google.visualization.DataTable();
-		data.addColumn('number', 'Distance'); 
-		data.addColumn('number', 'Heart rate');
-		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart rate');
-		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart rate');
-		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart rate');
-		data.addColumn({type:'string', role:'tooltip'});
-		data.addColumn('number', 'Heart rate');
-		data.addColumn({type:'string', role:'tooltip'});
-		
-		var rowData = [
-		{% for run in runs_1 %}
-		[{{run.distance}}, 
-			{{run.average_heart_rate}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
-			null, null,
-			null, null,
-			null, null,
-			null, null,
-		],
-		{% endfor %}
-		{% for run in runs_2 %}
-		[{{run.distance}}, 
-			null, null,
-			{{run.average_heart_rate}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
-			null, null,
-			null, null,
-			null, null,
-		],
-		{% endfor %}
-		{% for run in runs_3 %}
-		[{{run.distance}}, 
-			null, null,
-			null, null,
-			{{run.average_heart_rate}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
-			null, null,
-			null, null,
-		],
-		{% endfor %}
-		{% for run in runs_4 %}
-		[{{run.distance}}, 
-			null, null,
-			null, null,
-			null, null,
-			{{run.average_heart_rate}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
-			null, null,
-		],
-		{% endfor %}
-		{% for run in runs_5 %}
-		[{{run.distance}}, 
-			null, null,
-			null, null,
-			null, null,
-			null, null,
-			{{run.average_heart_rate}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Heart rate: {{run.average_heart_rate}}',
-		],
-		{% endfor %}
-		];
-		
-		data.addRows(rowData);
-
-        // Create and draw the visualization.
-        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-hr-distance'));
-		var options = {
-			backgroundColor: '#fefbf1',
-			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
-			fontSize : 14,
-			fontName : 'sans-serif',
-			width: 840,
-			height: 380,
-			legend: 'none',
-			pointSize: 5,
-			vAxis: {title: 'Heart rate (hb/min)'},
-			hAxis: {title: 'Distance (mi)'},
-		};
-        ac.draw(data, options);
-	}
-	
-	function drawYieldDistance() {
-		// Create and populate the data table.
-
-		var data = new google.visualization.DataTable();
-		data.addColumn('number', 'Distance'); 
+		data.addColumn('number', 'Heart Rate'); 
 		data.addColumn('number', 'Yield');
 		data.addColumn({type:'string', role:'tooltip'});
 		data.addColumn('number', 'Yield');
@@ -200,9 +112,9 @@
 		
 		var rowData = [
 		{% for run in runs_1 %}
-		[{{run.distance}}, 
+		[{{run.average_heart_rate}}, 
 			{{run.efficiency|floatformat:3}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			'Date: {{run.date}}; Heart rate: {{run.average_heart_rate}}; Yield: {{run.efficiency|floatformat:3}}',
 			null, null,
 			null, null,
 			null, null,
@@ -210,43 +122,43 @@
 		],
 		{% endfor %}
 		{% for run in runs_2 %}
-		[{{run.distance}}, 
+		[{{run.average_heart_rate}}, 
 			null, null,
 			{{run.efficiency|floatformat:3}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			'Date: {{run.date}}; Heart rate: {{run.average_heart_rate}}; Yield: {{run.efficiency|floatformat:3}}',
 			null, null,
 			null, null,
 			null, null,
 		],
 		{% endfor %}
 		{% for run in runs_3 %}
-		[{{run.distance}}, 
+		[{{run.average_heart_rate}}, 
 			null, null,
 			null, null,
 			{{run.efficiency|floatformat:3}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			'Date: {{run.date}}; Heart rate: {{run.average_heart_rate}}; Yield: {{run.efficiency|floatformat:3}}',
 			null, null,
 			null, null,
 		],
 		{% endfor %}
 		{% for run in runs_4 %}
-		[{{run.distance}}, 
+		[{{run.average_heart_rate}}, 
 			null, null,
 			null, null,
 			null, null,
 			{{run.efficiency|floatformat:3}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			'Date: {{run.date}}; Heart rate: {{run.average_heart_rate}}; Yield: {{run.efficiency|floatformat:3}}',
 			null, null,
 		],
 		{% endfor %}
 		{% for run in runs_5 %}
-		[{{run.distance}}, 
+		[{{run.average_heart_rate}}, 
 			null, null,
 			null, null,
 			null, null,
 			null, null,
 			{{run.efficiency|floatformat:3}},
-			'Date: {{run.date}}; Distance: {{run.distance}}; Yield: {{run.efficiency|floatformat:3}}',
+			'Date: {{run.date}}; Heart rate: {{run.average_heart_rate}}; Yield: {{run.efficiency|floatformat:3}}',
 		],
 		{% endfor %}
 		];
@@ -254,10 +166,10 @@
 		data.addRows(rowData);
 
         // Create and draw the visualization.
-        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-yield-distance'));
+        var ac = new google.visualization.ScatterChart(document.getElementById('visualization-yield-hr'));
 		var options = {
 			backgroundColor: '#fefbf1',
-			colors: ['#2AA097','#258F87', '#207A73', '#1B6863', '#124845'],
+			colors: ['#78b6b5','#258F87', '#207A73', '#1B6863', '#124845'],
 			fontSize : 14,
 			fontName : 'sans-serif',
 			width: 840,
@@ -265,15 +177,13 @@
 			legend: 'none',
 			pointSize: 5,
 			vAxis: {title: 'Yield (m/hb)'},
-			hAxis: {title: 'Distance (mi)'},
+			hAxis: {title: 'Heart rate (hb/min)'},
 		};
         ac.draw(data, options);
 	}
 	
 	google.setOnLoadCallback(drawYieldSpeed);
-	google.setOnLoadCallback(drawYieldDistance);
-	google.setOnLoadCallback(drawHRDistance);
-	
+	google.setOnLoadCallback(drawYieldHR);
 
 </script>
 {% endblock init %}
@@ -284,13 +194,11 @@
 
 {% block main_14 %}
 
-<h2>Yield vs. speed</a>:</h2>
+<h2>Yield vs. Speed</a>:</h2>
 <div id="visualization-yield-speed" style="width: 840px; height: 380px;"></div>
 
-<h2>Yield vs. distance</a>:</h2>
-<div id="visualization-yield-distance" style="width: 840px; height: 380px;"></div>
+<h2>Yield vs. Heart rate</a>:</h2>
+<div id="visualization-yield-hr" style="width: 840px; height: 380px;"></div>
 
-<h2>Heart rate vs. distance</a>:</h2>
-<div id="visualization-hr-distance" style="width: 840px; height: 380px;"></div>
 
 {% endblock main_14 %}

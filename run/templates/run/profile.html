@@ -66,11 +66,11 @@
 		<div class="span4 offset12">
 			<dl>
 				<dt>Resting heart rate</dt>
-				<dd>{{ profile.resting_heart_rate }} b/min</dd>
+				<dd>{{ profile.resting_heart_rate }} <sup>b</sup>&frasl;<sub>min</sub></dd>
 				<dt>Maximum heart rate&sup1;</dt>
-				<dd>{{ profile.maximum_heart_rate|floatformat:0 }} b/min </dd>
+				<dd>{{ profile.maximum_heart_rate|floatformat:0 }} <sup>b</sup>&frasl;<sub>min</sub> </dd>
 				<dt>vO<sub>2</sub>max&sup1;</dt>
-				<dd>{{ profile.vO2max|floatformat:0 }} ml/kg/min</dd>
+				<dd>{{ profile.vO2max|floatformat:0 }} <sup>ml</sup>&frasl;<sub>kg &middot; min</sub></dd>
 			</dl>
 		</div>
 	</div>

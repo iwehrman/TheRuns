@@ -208,9 +208,14 @@ LOGGING = {
             'propagate': True
         },
         'django.request': { # Stop SQL debug from logging to main logger
-            'handlers': ['request_handler', 'mail_admins'],
+            'handlers': ['request_handler'],
             'level': 'DEBUG',
             'propagate': False
+        },
+        '': { 
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True
         },
     }
 }

@@ -260,6 +260,9 @@ def months_in_range(first, last):
     
     return ran
         
+def splash(request): 
+    return render_to_response('run/splash.html', {}, 
+        context_instance=RequestContext(request))
         
 def __index_generic(request, user):
     start = datetime.datetime.now()
@@ -334,6 +337,7 @@ def index(request):
     user = request.user
     if not user.is_authenticated(): 
         return redirect_to_login(request)
+        # return splash(request)
     else: 
         return HttpResponseRedirect(reverse('run.views.index_user', 
             args=[user.username]))

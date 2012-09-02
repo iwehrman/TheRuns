@@ -55,9 +55,9 @@ class UserForm(ModelForm):
 class NewUserForm(ModelForm): 
     
     new_password1 = CharField(required=False,label='Password',
-        widget=PasswordInput(attrs={'tabindex':'5'}))
+        widget=PasswordInput(attrs={'tabindex':'5'}, render_value=True))
     new_password2 = CharField(required=False,label='Password (again)',
-        widget=PasswordInput(attrs={'tabindex':'6'}))
+        widget=PasswordInput(attrs={'tabindex':'6'}, render_value=True))
         
     def clean_username(self): 
         username = self.cleaned_data['username']

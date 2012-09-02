@@ -679,7 +679,7 @@ def signup(request):
             login(request, user)
             reset_last_modified(user.id)
             
-            messages.info(request, 'Your account has been created! Next, update the rest of your profile information below.')
+            messages.success(request, 'Your account has been created! Next, update the rest of your profile information below.')
             log.info("Created account for %s (%s)", user, user.email)
             return HttpResponseRedirect(reverse('run.views.userprofile_update'))
     else: 
@@ -729,7 +729,7 @@ def userprofile_update(request):
             pform.save()
             reset_last_modified(user.id)
             
-            messages.info("Profile updated successfully.")
+            messages.success(request, "Profile updated successfully.")
             log.info("Updated profile for %s: %s", user, user.get_profile())
             return HttpResponseRedirect(reverse('run.views.userprofile'))
     else: 

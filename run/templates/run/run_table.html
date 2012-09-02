@@ -13,6 +13,7 @@
 			{% if show_clear %}<th><i>Clear</i></th>{% endif %}
 		</tr>
 	</thead>
+{% if runlist %}
 {% for run in runlist %}
 	<tr>
 		<td>{{ run.date|naturalday|capfirst }}</td>
@@ -45,4 +46,9 @@
 		{% if show_clear %}<td><a href="/run/remove/{{run.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
+{% else %}
+	<tr>
+		<td colspan="7">No runs found. <a href="/run/new">Add a new run.</a></td>
+	</tr>
+{% endif %}
 </table>

@@ -17,12 +17,18 @@ from django.template import RequestContext
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 
+from django_recaptcha_field import create_form_subclass_with_recaptcha
+from recaptcha import RecaptchaClient
+
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
-from run.forms import UserForm, UserProfileForm, ImportForm
+from run.forms import UserForm, NewUserForm, UserProfileForm, ImportForm
 
 BASE_URI = "http://run.wehrman.me"
 
 log = logging.getLogger(__name__)
+
+recaptcha_client = RecaptchaClient('6LeP-tUSAAAAABJA06RqAXcoPsIpaGfvhvlyRPUA', 
+    '6LeP-tUSAAAAAPnvQazfnpwwIY7NnUxINzWTIv5K')
 
 WEEK_AG_PREFIX = 'WEEK_AG'
 MONTH_AG_PREFIX = 'MONTH_AG'
@@ -336,8 +342,8 @@ def index_user(request, username):
 def index(request):
     user = request.user
     if not user.is_authenticated(): 
-        return redirect_to_login(request)
-        # return splash(request)
+        # return redirect_to_login(request)
+        return splash(request)
     else: 
         return HttpResponseRedirect(reverse('run.views.index_user', 
             args=[user.username]))
@@ -438,7 +444,10 @@ def yield_user(request, username):
     
 def do_login(request):
     if request.method == "GET":
-        if 'destination' in request.session:
+        user = request.user
+        if user.is_authenticated(): 
+            return HttpResponseRedirect(reverse('run.views.index_user',args=[user.username]))
+        elif 'destination' in request.session:
             destination = request.session['destination']
             # log.debug('destination: %s', destination)
 
@@ -478,7 +487,7 @@ def do_logout(request):
         log.info("Logout: %s", request.user)
         logout(request)
     
-    return HttpResponseRedirect(reverse('run.views.do_login'))
+    return HttpResponseRedirect(reverse('run.views.index'))
     
 def do_permission_denied(request):
     return HttpResponseForbidden("Sorry, you can't have that.")
@@ -655,7 +664,31 @@ def password_reset_finish(request):
             return render_to_response('run/reset_finish.html', 
                 context_instance=RequestContext(request))
         
+def signup(request):
+    args = {'label': 'Are you human?'}
+    CaptchaNewUserForm = create_form_subclass_with_recaptcha(NewUserForm, 
+        recaptcha_client, args)
+    if request.method == 'POST': 
+        uform = CaptchaNewUserForm(request, request.POST)
+        if uform.is_valid():
+            user = uform.save()
+            np2 = uform.cleaned_data['new_password2']
+            user.set_password(np2)
+            user.save()
+            user = authenticate(username=uform.cleaned_data['username'], password=np2)
+            login(request, user)
+            reset_last_modified(user.id)
+            
+            messages.info(request, 'Your account has been created! Next, update the rest of your profile information below.')
+            log.info("Created account for %s (%s)", user, user.email)
+            return HttpResponseRedirect(reverse('run.views.userprofile_update'))
+    else: 
+        uform = CaptchaNewUserForm(request)
 
+    context = {'uform': uform}
+    return render_to_response('run/signup.html', 
+        context,
+        context_instance=RequestContext(request))
 
 ### UserProfile ###
 
@@ -696,6 +729,7 @@ def userprofile_update(request):
             pform.save()
             reset_last_modified(user.id)
             
+            messages.info("Profile updated successfully.")
             log.info("Updated profile for %s: %s", user, user.get_profile())
             return HttpResponseRedirect(reverse('run.views.userprofile'))
     else: 

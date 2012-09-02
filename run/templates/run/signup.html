@@ -1,0 +1,109 @@
+{% extends "run/base_14.html" %}
+
+{% block title %}The Runs: Sign up {% endblock title %}
+
+{% block init %}
+<script type="text/javascript"> 
+	$(document).ready( function(){
+	$('input[tabindex=1]').focus();
+	});
+</script>
+<style type="text/css">
+	#recaptcha_response_field {
+    	height: 16px; 
+    	line-height: 16px; 
+    	font-size: 16px; 
+    }
+</style>
+{% endblock init %}
+
+{% block header %} Sign up {% endblock header %}
+
+{% block login-menu %}{% endblock login-menu %}
+
+{% block main_14 %}
+
+	<form action="/signup/" method="post">
+	{% csrf_token %}
+	<fieldset>
+	<legend> New account information </legend>
+
+	{% for field in uform %}
+
+	<div class="clearfix {% if field.errors %}error{% endif %}">
+		<label for="{{ field.auto_id }}">{{ field.label }}</label>
+		<div class="input">
+			{{ field|safe }}
+			{{ field.errors }}
+	    </div>	
+	</div>
+	
+	{% endfor %}
+
+<!-- 	<div class="clearfix ">
+		<label for="id_first_name">First name</label>
+		<div class="input">
+			<input name="first_name" value="" maxlength="30" type="text" id="id_first_name" tabindex="1" />
+			
+	    </div>	
+	</div>
+
+	<div class="clearfix ">
+		<label for="id_last_name">Last name</label>
+		<div class="input">
+			<input name="last_name" value="" maxlength="30" type="text" id="id_last_name" tabindex="2" />
+			
+	    </div>	
+	</div>
+
+	<div class="clearfix">
+		<label for="id_username">User name</label>
+		<div class="input">
+			<input tabindex="3" type="text" name="username" id="id_username" 
+				class="input-large" value="">
+		</div>
+	</div>
+
+	<div class="clearfix">
+		<label for="id_email">Email address</label>
+		<div class="input">
+			<input tabindex="4" type="text" name="email" id="id_email" 
+				class="input-large" value="">
+		</div>
+	</div>
+
+	<div class="clearfix">
+		<label for="id_password1">Password</label>
+		<div class="input">
+			<input tabindex="5" type="password" name="password1" id="id_password1" 
+				class="input-large">
+		</div>
+	</div>
+	
+	<div class="clearfix">
+		<label for="id_password2">Password (again)</label>
+		<div class="input">
+			<input tabindex="6" type="password" name="password2" id="id_password2" 
+				class="input-large">
+		</div>
+	</div>
+
+	<div class="clearfix">
+		<label for="captcha">Captcha</label>
+		<div class="input">
+			<script type="text/javascript" 
+				src="http://www.google.com/recaptcha/api/challenge?k=6LeP-tUSAAAAAPnvQazfnpwwIY7NnUxINzWTIv5K">
+	    	</script>
+    	</div>
+    </div> -->
+
+	<div class="clearfix">
+		<div class="input">
+			<button tabindex="8" name = "login" class="btn primary">Create account</button>
+		</div>
+	</div>
+
+	</fieldset>
+	</form>
+
+{% endblock main_14 %}

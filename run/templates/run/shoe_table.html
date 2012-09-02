@@ -9,6 +9,7 @@
 			{% if show_clear %}<th><i>Clear</i>&nbsp;</th>{% endif %}
 		</tr>
 	</thead>
+{% if shoelist %}
 {% for shoe in shoelist %}
 	<tr>
     	<td>{{ shoe.make }}</td>
@@ -40,4 +41,9 @@
 		{% if show_clear %}<td><a href="/shoe/remove/{{shoe.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
+{% else %}
+	<tr>
+		<td colspan="7">No shoes found. <a href="/shoe/new">Add a new pair of shoes.</a></td>
+	</tr>
+{% endif %}
 </table>

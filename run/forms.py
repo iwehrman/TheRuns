@@ -2,7 +2,6 @@ import datetime, logging, json
 
 from django.contrib.auth.models import User
 from django.forms import *
-
 from run.models import UserProfile, Run, hms_to_time
 
 log = logging.getLogger(__name__)
@@ -53,7 +52,53 @@ class UserForm(ModelForm):
             'is_superuser', 'last_login', 'date_joined', 'groups', 
             'user_permissions']
 
+class NewUserForm(ModelForm): 
+    
+    new_password1 = CharField(required=False,label='Password',
+        widget=PasswordInput(attrs={'tabindex':'5'}))
+    new_password2 = CharField(required=False,label='Password (again)',
+        widget=PasswordInput(attrs={'tabindex':'6'}))
+        
+    def clean_username(self): 
+        username = self.cleaned_data['username']
+        try: 
+            user = User.objects.get(username=username)
+            # a user with this username already exists; raise an exception. 
+            raise forms.ValidationError("Username %s is already in use.", username)
+        except: 
+            # a user with username was not found; all is well. 
+            return username
 
+    def clean_email(self): 
+        email = self.cleaned_data['email']
+        try: 
+            user = User.objects.get(email=email)
+            # a user with this email address already exists; raise an exception. 
+            raise forms.ValidationError("Email address %s is already in use.", email)
+        except: 
+            # a user with email address was not found; all is well. 
+            return email
+
+    def clean_new_password2(self):
+        np1 = self.cleaned_data['new_password1']
+        np2 = self.cleaned_data['new_password2']
+        if np1 != np2:
+            raise forms.ValidationError("Password fields do not match.")
+        if len(np2) < 6:
+            raise forms.ValidationError("Password must be at least 6 characters long.")
+
+        return np2
+    
+    class Meta: 
+        model = User
+        widgets = {'username': TextInput(attrs={'tabindex':'1'}),
+            'first_name': TextInput(attrs={'tabindex':'2'}),
+            'last_name': TextInput(attrs={'tabindex':'3'}),
+            'email': TextInput(attrs={'tabindex':'4'}),
+            }
+        exclude = ['password', 'is_staff', 'is_active', 
+            'is_superuser', 'last_login', 'date_joined', 'groups', 
+            'user_permissions']
 
 def obj_to_run(obj):
     

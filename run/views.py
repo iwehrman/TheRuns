@@ -466,7 +466,6 @@ def do_login(request):
 
             user = authenticate(username=username, password=password)
             if user is not None:
-                
                 if user.is_active:
                     log.info("Successful login: %s", user)
                     login(request, user)
@@ -477,9 +476,11 @@ def do_login(request):
                     else:
                         return HttpResponseRedirect(reverse('run.views.index'))
                 else:
-                    log.warning("Failed login: %s", user)
+                    messages.error(request, "Login failure: user is not active.")
+                    log.warning("Failed login: user %s is not active.", user)
             else: 
-                log.warning("Failed login: %s", username)
+                messages.error(request, "Login failure: incorrect username or password.")
+                log.warning("Failed login: authentication failed for %s.", username)
                 return redirect_to_login(request, reset_destination=False)
     
 def do_logout(request):
@@ -740,6 +741,21 @@ def userprofile_update(request):
     return render_to_response('run/profile_edit.html', 
         context,
         context_instance=RequestContext(request))
+
+def userprofile_delete(request): 
+    if not request.user.is_authenticated(): 
+        return redirect_to_login(request)
+
+    if request.GET['really'] == 'yes': 
+        user = request.user
+        log.info("Logout: %s", user)
+        logout(request)
+        log.info("Deleting user: %s", user)
+        user.delete()
+
+        # FIXME also need to clear out all the caches and aggregates
+
+    return HttpResponseRedirect(reverse('run.views.index'))
 
 def incomplete_profile(user):
     profile = user.get_profile()

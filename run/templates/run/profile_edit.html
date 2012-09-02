@@ -1,6 +1,7 @@
 {% extends "run/base_14.html" %}
 
 {% block init %}
+<script src="{{ STATIC_URL }}bootstrap/js/bootstrap-modal.js"></script>
 <script type="text/javascript"> 
 	$(document).ready( function(){
 	$('input[tabindex=1]').focus();
@@ -58,7 +59,25 @@
 	<hr/>
 	
 	<div class="span10">
-	<i>Your sex, weight, birthdate and resting heart rate are used to approximate the amount of calories you burn while running. Use a heart-rate monitor and log your average heart rate with each run for the best approximation.</i>
+	<i>Your sex, weight, birthdate and resting heart rate are used to approximate the amount of calories you burn while running. Use a heart-rate monitor and log your average heart rate with each run for the best approximation.</i><br/><br/>
+
+
+		<div id="modal-from-dom" class="modal hide fade">
+			<div class="modal-header">
+			  <a href="#" class="close">&times;</a>
+			  <h3>Really delete your account?</h3>
+			</div>
+			<div class="modal-body">
+			  <p>Are you sure you want to delete your account? This will permanently delete your profile and all past running data. <b>It cannot be undone.</b></p>
+			</div>
+			<div class="modal-footer">
+				<a href="#" class="btn primary" onclick="javascript:$('#modal-from-dom').modal('hide')">No, don't delete my account.</a>
+				<a href="/profile/delete?really=yes" class="btn secondary danger">Yes, really delete my account.</a>
+			  
+			</div>
+		</div>
+
+		<a href="#" data-controls-modal="modal-from-dom" data-backdrop="true" data-keyboard="true">Delete your account...</a>
 	</div>
 
 {% endblock main_14 %}

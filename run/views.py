@@ -710,7 +710,7 @@ def do_signup(request):
             
             messages.success(request, 'Your account has been created! Next, update the rest of your profile information below.')
             log.info("Created account for %s (%s)", user, user.email)
-            return HttpResponseRedirect(reverse('run.views.userprofile_update'))
+            return HttpResponseRedirect(reverse('run.views.userprofile_update', args=[user.username]))
     else: 
         uform = CaptchaNewUserForm(request)
 

@@ -1,9 +1,5 @@
 <html>
 <head>
-	<!--
-	<link rel="stylesheet/less" type="text/css" href="{{STATIC_URL}}bootstrap/lib/bootstrap.less">
-	<script src="{{ STATIC_URL }}less.js" type="text/javascript"></script>
-	--> 
 	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}bootstrap/bootstrap.min.css">
 	<script type="text/javascript" src="http://use.typekit.com/dtb3tdq.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
@@ -21,106 +17,103 @@
     <style type="text/css">
       /* Override some defaults */
 
-      body {
-        padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
-      }
-      .container > footer p {
-        text-align: center; /* center align it with the container */
-      }
-      .container {
-        width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
-      }
+		body {
+			padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+		}
+		.container > footer p {
+			text-align: center; /* center align it with the container */
+		}
+		.container {
+			width: 820px;
+		}
 
-      /* The white background content wrapper */
-      .content {
-/*        background-color: #fdf6e3;
-*/        padding: 20px;
-        margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
-        -webkit-border-radius: 6px;
-           -moz-border-radius: 6px;
-                border-radius: 6px;
-        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-                box-shadow: 0 1px 2px rgba(0,0,0,.15);
-      }
+		.content {
+		    padding: 20px;
+			margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+			-webkit-border-radius: 6px;
+			   -moz-border-radius: 6px;
+			        border-radius: 6px;
+			-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+			   -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+			        box-shadow: 0 1px 2px rgba(0,0,0,.15);
+		}
 
-      /* Page header tweaks */
-      .page-header {
-        background-color: #eee8d5;
-        padding: 20px 20px 10px;
-        margin: -20px -20px 20px;
-      }
+		/* Page header tweaks */
+		.page-header {
+			background-color: #eee8d5;
+			padding: 20px 20px 10px;
+			margin: -20px -20px 20px;
+		}
 
-      /* Give a quick and non-cross-browser friendly divider */
-      .content .span4 {
-        margin-left: 0;
-        padding-left: 19px;
-        border-left: 1px solid #eee;
-      }
+		/* Give a quick and non-cross-browser friendly divider */
+		.content .span4 {
+			margin-left: 0;
+			padding-left: 19px;
+			border-left: 1px solid #eee;
+		}
 
-	.topbar { 
-		color: #aaa;
-	}
-	
-	.topbar a {
-		.color: #fff;
-		
-	}
+		.topbar { 
+			color: #aaa;
+		}
 
-    .topbar .btn {
-    	border: 0;
-    }
+		.topbar a {
+			.color: #fff;
+			
+		}
 
-    a.brand:hover {
-    	text-decoration: none; 
-    }
+		.topbar .btn {
+			border: 0;
+		}
 
+		a.brand:hover {
+			text-decoration: none; 
+		}
     </style>
 
-<title>{% block title %}Generic title{% endblock title %}</title>
+	<title>{% block title %}Generic title{% endblock title %}</title>
 
-<script type="text/javascript">
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-28314901-1']);
+	  _gaq.push(['_setDomainName', 'theruns.in']);
+	  _gaq.push(['_trackPageview']);
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-28314901-1']);
-  _gaq.push(['_setDomainName', 'theruns.in']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
 </head>
+
 <body class="tk-museo-sans">
-	
 	<div class="topbar" data-dropdown="dropdown" 
 		style="display: {% block topbar-display %}inline{% endblock topbar-display %};">
 		<div class="topbar-inner">
 			<div class="container-fluid">
 				<a class="brand tk-museo" href="/">The Runs</a>
 				<ul class="nav">
-					<li {% block section-home %}{%endblock%}><a href="/" accesskey="h">Home</a></li>
-					<li {% block section-profile %}{%endblock%}><a href="/profile" accesskey="p">Profile</a></li>
-					<li {% block section-addrun %}{%endblock%}><a href="/run/new" accesskey="a">Add Run</a></li>
+					<li {% block section-home %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}" accesskey="h">Home</a></li>
+					<li {% block section-profile %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/profile" accesskey="p">Profile</a></li>
+					<li {% block section-addrun %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/run/new" accesskey="a">Add Run</a></li>
 				</ul>
 				{% block login-menu %}
 				<ul class="nav secondary-nav">
 					{% if user.is_authenticated %}
 					<li class="dropdown"> 
-						<a href="/u/{{user.username}}" class="dropdown-toggle">Logged in: {{user.username}}</a>
+						<a href="/{{user.username|default:'_bounce'}}" class="dropdown-toggle">Logged in: {{user.username}}</a>
 						<ul class="dropdown-menu">
-							<li><a href="/profile/update">Account Settings</a></li>
-							<li><a href="/import">Import...</a></li>
-							<li><a href="/export">Export</a></li>
+							<!--li><a href="/_about">About</a></li>
+							<li class="divider"></li-->
+							<li><a href="/{{user.username|default:'_bounce'}}/profile/update">Settings...</a></li>
+							<li><a href="/{{user.username|default:'_bounce'}}/import">Import...</a></li>
+							<li><a href="/{{user.username|default:'_bounce'}}/export">Export</a></li>
 							<li class="divider"></li>
-							<li><a href="/logout">Logout</a></li>
+							<li><a href="/_logout">Logout</a></li>
 						</ul>
 					</li>
 					{% else %}
-					<a href="/login">Log in...</a>
+					<a href="/_login">Log in...</a>
 					{% endif %}
 				</ul>
 				{% endblock login-menu %}
@@ -130,35 +123,27 @@
 		
 	<div class="container">
 		<div class="content">
-
-		<div class="row">
-			{% if messages %}
+			<div class="row">
+				{% if messages %}
 				<div class="span10 offset2">
 			    {% for message in messages %}
-				<div class="alert-message {{ message.tags }} fade in" data-alert="alert">
-				  <a class="close" href="#">×</a>
-				  <p><strong>{{message.tags|capfirst}}:</strong> {{message}}</p>
+					<div class="alert-message {{ message.tags }} fade in" data-alert="alert">
+					  <a class="close" href="#">×</a>
+					  <p><strong>{{message.tags|capfirst}}:</strong> {{message}}</p>
+					</div>
+				    {% endfor %}
 				</div>
-			    {% endfor %}
-				</div>
-			{% endif %}
-			
-			{% block main %} Generic main {% endblock main %}
-		</div> <!-- /row -->
-		
-		<div class="row" style="text-align: center">
-			{% block pagination %} 
-			{% endblock pagination %}
-		</div>
-
-	</div> <!-- /content -->
-	
-	<footer>
-		<p>&copy; Ian</p>
-	</footer>
-	
+				{% endif %}
+				{% block main %} Generic main {% endblock main %}
+			</div> <!-- /row -->
+			<div class="row" style="text-align: center">
+				{% block pagination %} 
+				{% endblock pagination %}
+			</div>
+		</div> <!-- /content -->
+		<footer style="color: lightgrey;">
+			<p>&copy; {% now "Y" %} <a href="http://www.wehrman.org/" style="text-decoration: none; color: lightgrey;">Ian Wehrman</a></p>
+		</footer>
 	</div> <!-- /container -->
-
-
 </body>
 </html>

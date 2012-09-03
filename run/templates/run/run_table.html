@@ -43,12 +43,12 @@
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>
-		{% if show_clear %}<td><a href="/run/remove/{{run.id}}">Clear</a></td>{% endif %}
+		{% if show_clear %}<td><a href="/{{user.username|default:'_bounce'}}/run/remove/{{run.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
 {% else %}
 	<tr>
-		<td colspan="7">No runs found. <a href="/run/new">Add a new run.</a></td>
+		<td colspan="7">No runs found. <a href="/{{user.username|default:'_bounce'}}/run/new">Add a new run.</a></td>
 	</tr>
 {% endif %}
 </table>

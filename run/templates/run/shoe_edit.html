@@ -14,7 +14,7 @@
 
 {% block main_14 %}
 
-	<form action="/shoe/update/" method="post">
+	<form action="/{{user.username|default:'_bounce'}}/shoe/new/" method="post">
 	<fieldset>
 	<legend>Add a new shoe </legend>
 

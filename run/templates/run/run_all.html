@@ -21,9 +21,9 @@
 		</div>
 		<div class="span6 offset4">
 			<ul class="breadcrumb pull-right">
-				<li><a href="/profile/">Recent</a></li> <span class="divider">/</span>
-				<li class="active"><a href="/run/all">All</a></li> <span class="divider">/</span>
-				<li><a href="/run/new">Add</a></li> 
+				<li><a href="/{{user.username|default:'_bounce'}}/profile/">Recent</a></li> <span class="divider">/</span>
+				<li class="active">All</li> <span class="divider">/</span>
+				<li><a href="/{{user.username|default:'_bounce'}}/run/new">Add</a></li> 
 			</ul>
 		</div>
 	</div>

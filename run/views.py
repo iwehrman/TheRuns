@@ -209,7 +209,8 @@ def index_last_modified_username(request, username):
     user = User.objects.get(username=username)
     return index_last_modified_user(request, user)
     
-def index_last_modified_default(request):
+def index_last_modified_default(request, username=None): 
+    # ignore the username; we want to base decisions on the current user
     return index_last_modified_user(request, request.user)
     
 def reset_last_modified(userid):
@@ -266,8 +267,12 @@ def months_in_range(first, last):
     
     return ran
         
-def splash(request): 
+def do_splash(request): 
     return render_to_response('run/splash.html', {}, 
+        context_instance=RequestContext(request))
+
+def do_about(request): 
+    return render_to_response('run/about.html', {}, 
         context_instance=RequestContext(request))
         
 def __index_generic(request, user):
@@ -449,6 +454,7 @@ def yield_user(request, username):
         context_instance=RequestContext(request))
     
 def do_login(request):
+    
     if request.method == "GET":
         user = request.user
         if user.is_authenticated(): 
@@ -505,13 +511,28 @@ def redirect_to_login(request, reset_destination=True):
         
     return HttpResponseRedirect(reverse('run.views.do_login'))
 
-def do_import(request):
+def is_authorized(request, username=None):
     user = request.user
-    if not user.is_authenticated(): 
+    if username:
+        return user.is_authenticated() and user.username == username
+    else:
+        return user.is_authenticated()
+
+def do_bounce(request, rest): 
+    if not is_authorized(request): 
+        return redirect_to_login(request)
+
+    username = request.user.username
+    return HttpResponseRedirect(("/%s/%s" % (username, rest)))
+
+def do_import(request, username):
+    user = request.user
+
+    if not is_authorized(request, username): 
         return redirect_to_login(request)
     elif incomplete_profile(user):
         messages.info(request, 'You must complete your profile before importing runs.')
-        return HttpResponseRedirect(reverse('run.views.userprofile_update'))
+        return HttpResponseRedirect(reverse('run.views.userprofile_update', args=[user.username]))
     else:
         if request.method == 'POST':
             form = ImportForm(request.POST, request.FILES)
@@ -520,10 +541,15 @@ def do_import(request):
                 really = form.cleaned_data['really_erase']
                 runs = form.cleaned_data['data_file']
                 
+                log.debug("erase %s", erase)
+                log.debug("really %s", really)
+
                 # delete existing runs if the user really wants to
                 if erase and really: 
                     existing = Run.objects.filter(user=user.id)
                     existing.delete()
+                elif erase or really: 
+                    messages.error(request, "Data not imported: should existing runs be erased?")
                     
                 for run in runs: 
                     run.user = user
@@ -537,16 +563,16 @@ def do_import(request):
                     invalidate_cache(user, run.date)
                     
                 messages.success(request, "Data imported successfully.")
-                return HttpResponseRedirect(reverse('run.views.userprofile'))
+                return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
         else:
             form = ImportForm()
     
         return render_to_response('run/import.html', {'form': form},
             context_instance=RequestContext(request))
 
-def do_export(request):
+def do_export(request, username):
     user = request.user
-    if not user.is_authenticated(): 
+    if not is_authorized(request, username):
         return redirect_to_login(request)
     else:
         
@@ -671,7 +697,7 @@ def password_reset_finish(request):
             return render_to_response('run/reset_finish.html', 
                 context_instance=RequestContext(request))
         
-def signup(request):
+def do_signup(request):
     args = {'label': 'Are you human?'}
     CaptchaNewUserForm = create_form_subclass_with_recaptcha(NewUserForm, 
         recaptcha_client, args)
@@ -701,26 +727,26 @@ def signup(request):
 
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_default)
-def userprofile(request):
-    user = request.user
-    if not user.is_authenticated(): 
+def userprofile(request, username):
+    if not is_authorized(request, username):
         return redirect_to_login(request)
-    else: 
-        runs = Run.objects.filter(user=user.id).order_by('-date')[:5]
-        shoes = (Shoe.objects.filter(user=user.id, active=True)
-            .order_by('-miles')[:3])
-        today = date.today()
-        
-        context = {'profile' : user.get_profile() }
-        context['runs'] = runs
-        context['shoes'] = shoes
-        context['today'] = today
 
-        return render_to_response('run/profile.html', context, 
-            context_instance=RequestContext(request))
+    user = request.user
+    runs = Run.objects.filter(user=user.id).order_by('-date')[:5]
+    shoes = (Shoe.objects.filter(user=user.id, active=True)
+        .order_by('-miles')[:3])
+    today = date.today()
+    
+    context = {'profile' : user.get_profile() }
+    context['runs'] = runs
+    context['shoes'] = shoes
+    context['today'] = today
+
+    return render_to_response('run/profile.html', context, 
+        context_instance=RequestContext(request))
         
-def userprofile_update(request): 
-    if not request.user.is_authenticated(): 
+def userprofile_update(request, username): 
+    if not is_authorized(request, username):
         return redirect_to_login(request)
     
     user = request.user
@@ -738,7 +764,7 @@ def userprofile_update(request):
             
             messages.success(request, "Profile updated successfully.")
             log.info("Updated profile for %s: %s", user, user.get_profile())
-            return HttpResponseRedirect(reverse('run.views.userprofile'))
+            return HttpResponseRedirect(reverse('run.views.userprofile',args=[user.username]))
     else: 
         uform = UserForm(instance=user)
         pform = UserProfileForm(instance=profile)
@@ -748,8 +774,8 @@ def userprofile_update(request):
         context,
         context_instance=RequestContext(request))
 
-def userprofile_delete(request): 
-    if not request.user.is_authenticated(): 
+def userprofile_delete(request, username): 
+    if not is_authorized(request, username):
         return redirect_to_login(request)
 
     if request.GET['really'] == 'yes': 
@@ -759,7 +785,7 @@ def userprofile_delete(request):
         log.info("Deleting user: %s", user)
         user.delete()
 
-        # FIXME also need to clear out all the caches and aggregates
+        # FIXME also need to clear out all the caches and aggregates? 
 
     return HttpResponseRedirect(reverse('run.views.index'))
 
@@ -786,35 +812,34 @@ def page_range(page):
     
     return range(lower, upper + 1)
         
-def run_all(request):
-    user = request.user
-    if not user.is_authenticated(): 
+def run_all(request, username):
+    if not is_authorized(request, username):
         return redirect_to_login(request)
-    else: 
-        run_list = Run.objects.filter(user=user.id).order_by('-date')
-        paginator = Paginator(run_list, 10)
-        
-        page = request.GET.get('page')
-        try: 
-            runs = paginator.page(page)
-        except (PageNotAnInteger, TypeError): 
-            runs = paginator.page(1)
-        except EmptyPage:
-            runs = paginator.page(paginator.num_pages)
-        finally: 
-            context = {'range': page_range(runs), 'runs': runs}
-            return render_to_response('run/run_all.html', 
-                context,
-                context_instance=RequestContext(request))
 
-def run_new(request):
     user = request.user
-    if not user.is_authenticated(): 
+    run_list = Run.objects.filter(user=user.id).order_by('-date')
+    paginator = Paginator(run_list, 10)
+    page = request.GET.get('page')
+    try: 
+        runs = paginator.page(page)
+    except (PageNotAnInteger, TypeError): 
+        runs = paginator.page(1)
+    except EmptyPage:
+        runs = paginator.page(paginator.num_pages)
+    finally: 
+        context = {'range': page_range(runs), 'runs': runs}
+        return render_to_response('run/run_all.html', 
+            context,
+            context_instance=RequestContext(request))
+
+def run_new(request, username):
+    if not is_authorized(request, username): 
         return redirect_to_login(request)
-    
+
+    user = request.user
     if incomplete_profile(user):
         messages.info(request, 'You must complete your profile before adding a run.')
-        return HttpResponseRedirect(reverse('run.views.userprofile_update'))
+        return HttpResponseRedirect(reverse('run.views.userprofile_update', args=[user.username]))
     else: 
         p = user.get_profile()
         s = Shoe.objects.filter(user=p.id)
@@ -823,8 +848,8 @@ def run_new(request):
             context,
             context_instance=RequestContext(request))
     
-def run_update(request): 
-    if not request.user.is_authenticated(): 
+def run_update(request, username): 
+    if not is_authorized(request, username):
         return redirect_to_login(request)
     
     run = Run()
@@ -838,7 +863,7 @@ def run_update(request):
             int(post['date_month']), int(post['date_day']))
         run.date = date
     except ValueError: 
-        return render_to_response('run/profile.html', 
+        return render_to_response('run/run_edit.html', 
             {'profile': profile, 'error_message': 'Bad date.'}, 
             context_instance=RequestContext(request))
 
@@ -860,7 +885,7 @@ def run_update(request):
             
         run.set_duration(d_hours, d_minutes, d_seconds)
     except ValueError: 
-        return render_to_response('run/profile.html', 
+        return render_to_response('run/run_edit.html', 
             {'profile': profile, 'error_message': 'Bad duration.'}, 
             context_instance=RequestContext(request))
     
@@ -868,11 +893,11 @@ def run_update(request):
         if (post['distance']):
             run.distance = post['distance']
         else: 
-            return render_to_response('run/profile.html', 
+            return render_to_response('run/run_edit.html', 
                 {'profile': profile, 'error_message': 'Distance must be set.'}, 
                 context_instance=RequestContext(request))
     except ValueError: 
-        return render_to_response('run/profile.html', 
+        return render_to_response('run/run_edit.html', 
             {'profile': profile, 'error_message': 'Bad distance.'}, 
             context_instance=RequestContext(request))
 
@@ -884,7 +909,7 @@ def run_update(request):
             # shoe.miles += run.distance
             run.shoe = shoe
     except Shoe.DoesNotExist: 
-        return render_to_response('run/profile.html', 
+        return render_to_response('run/run_edit.html', 
             {'profile': profile, 'error_message': 'Bad shoe id'}, 
             context_instance=RequestContext(request))
 
@@ -892,7 +917,7 @@ def run_update(request):
         if (post['average_heart_rate']):
             run.average_heart_rate = int(post['average_heart_rate'])
     except ValueError: 
-        return render_to_response('run/profile.html', 
+        return render_to_response('run/run_edit.html', 
             {'profile': profile, 'error_message': 'Bad average heart rate.'}, 
             context_instance=RequestContext(request))
     
@@ -913,13 +938,13 @@ def run_update(request):
         
     messages.success(request, "Added run " + str(run) + ".")
     
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
+    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
     
-def run_delete(request, run_id):
-    user = request.user
-    if not user.is_authenticated(): 
+def run_delete(request, username, run_id):
+    if not is_authorized(request, username): 
         return redirect_to_login(request)
-        
+    
+    user = request.user    
     run = get_object_or_404(Run, pk=run_id)
     log.info('Deleting run for %s: %s', user, run)
     run.delete()
@@ -929,83 +954,78 @@ def run_delete(request, run_id):
     
     messages.success(request, "Deleted run.")
 
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
+    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
     
     
 ### Shoes ###
 
-def shoe_new(request):
-    if not request.user.is_authenticated(): 
+def shoe_new(request, username):
+    if not is_authorized(request, username): 
         return redirect_to_login(request)
 
-    return render_to_response('run/shoe_edit.html', 
-        {},
-        context_instance=RequestContext(request))
-
-def shoe_all(request):
     user = request.user
-    if not user.is_authenticated(): 
-        return redirect_to_login(request)
-    else: 
-        shoe_list = Shoe.objects.filter(user=user.id).order_by('-miles')
-        paginator = Paginator(shoe_list, 10)
-
-        page = request.GET.get('page')
-        try: 
-            shoes = paginator.page(page)
-        except (PageNotAnInteger, TypeError): 
-            shoes = paginator.page(1)
-        except EmptyPage:
-            shoes = paginator.page(paginator.num_pages)
-        finally: 
-            context = {'range': page_range(shoes), 'shoes': shoes}
-            return render_to_response('run/shoe_all.html', 
-                context, 
+    if request.method == 'POST': 
+        post = request.POST
+        shoe = Shoe()
+        shoe.user = user
+        shoe.make = post['make']
+        shoe.model = post['model']
+        try:
+            shoe.miles = int(post['miles'])
+        except ValueError:
+            messages.error(request, "Bad mileage.")
+            return render_to_response('run/shoe_edit.html', 
                 context_instance=RequestContext(request))
+        shoe.active = True
+        shoe.save()
+        reset_last_modified(user.id)
 
-def shoe_update(request): 
-    user = request.user
-    if not user.is_authenticated(): 
-        return redirect_to_login(request)
-
-    post = request.POST
-
-    shoe = Shoe()
-    shoe.user = user
-    shoe.make = post['make']
-    shoe.model = post['model']
-    try:
-        shoe.miles = post['miles']
-    except ValueError:
-        return render_to_response('run/profile.html', 
-            {'error_message': 'Bad miles.'}, 
+        log.info('Added shoe for %s: %s', user, shoe)
+        messages.success(request, "Shoe added.")
+        return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
+    else:
+        return render_to_response('run/shoe_edit.html', 
             context_instance=RequestContext(request))
-    shoe.active = True
-    shoe.save()
-    reset_last_modified(user.id)
-    
-    log.info('Added shoe for %s: %s', user, shoe)
-    messages.success(request, "Shoe added.")
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
 
-def shoe_delete(request, shoe_id):
-    user = request.user
-    if not user.is_authenticated(): 
+def shoe_all(request, username):
+    if not is_authorized(request, username):
         return redirect_to_login(request)
-        
+
+    user = request.user
+    shoe_list = Shoe.objects.filter(user=user.id).order_by('-miles')
+    paginator = Paginator(shoe_list, 10)
+
+    page = request.GET.get('page')
+    try: 
+        shoes = paginator.page(page)
+    except (PageNotAnInteger, TypeError): 
+        shoes = paginator.page(1)
+    except EmptyPage:
+        shoes = paginator.page(paginator.num_pages)
+    finally: 
+        context = {'range': page_range(shoes), 'shoes': shoes}
+        return render_to_response('run/shoe_all.html', 
+            context, 
+            context_instance=RequestContext(request))
+
+def shoe_delete(request, username, shoe_id):
+    if not is_authorized(request, username):
+        return redirect_to_login(request)
+
+    user = request.user    
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     log.info('Deleting shoe for %s: %s', user, shoe)
     shoe.delete()
     reset_last_modified(shoe.user.id)
     
     messages.success(request, "Shoe deleted.")
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
+    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
         
-def shoe_retire(request, shoe_id):
-    user = request.user
-    if not user.is_authenticated(): 
+def shoe_retire(request, username, shoe_id):
+    if not is_authorized(request, username):
         return redirect_to_login(request)
 
+    user = request.user
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     shoe.active = False
     shoe.save()
@@ -1013,13 +1033,13 @@ def shoe_retire(request, shoe_id):
     
     log.info('Retired shoe for %s: %s', user, shoe)
     messages.success(request, "Shoe retired.")
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
+    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
 
-def shoe_activate(request, shoe_id):
-    user = request.user
-    if not user.is_authenticated(): 
+def shoe_activate(request, username, shoe_id):
+    if not is_authorized(request, username):
         return redirect_to_login(request)
 
+    user = request.user
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     shoe.active = True
     shoe.save()
@@ -1027,4 +1047,4 @@ def shoe_activate(request, shoe_id):
 
     log.info('Activated shoe for %s: %s', user, shoe)
     messages.success(request, "Shoe activated.")
-    return HttpResponseRedirect(reverse('run.views.userprofile'))
+    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))

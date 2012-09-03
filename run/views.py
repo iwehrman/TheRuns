@@ -335,13 +335,6 @@ def __index_generic(request, user):
     return render_to_response('run/index.html', context, 
         context_instance=RequestContext(request))
         
-def index_bounce(request):
-    user = request.user
-    if user.is_authenticated():
-        return HttpResponseRedirect(reverse('run.views.index_user',args=[user.username]))
-    else:
-        return redirect_to_login(request)
-        
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_username)
 def index_user(request, username):
@@ -354,7 +347,7 @@ def index(request):
     user = request.user
     if not user.is_authenticated(): 
         # return redirect_to_login(request)
-        return splash(request)
+        return do_splash(request)
     else: 
         return HttpResponseRedirect(reverse('run.views.index_user', 
             args=[user.username]))
@@ -524,6 +517,9 @@ def do_bounce(request, rest):
 
     username = request.user.username
     return HttpResponseRedirect(("/%s/%s" % (username, rest)))
+
+def do_bounce_default(request): 
+    return do_bounce(request, "")
 
 def do_import(request, username):
     user = request.user

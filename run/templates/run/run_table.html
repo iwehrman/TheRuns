@@ -6,9 +6,9 @@
 			<th>Distance</th>
 			<th>Duration</th>
 			<th>Pace</th>
+			<th>Energy</th>
 			<th>HR</th>
 			<th>HR %</th>
-			<th>Energy</th>
 			<th title="Distance run (in meters) per heartbeat">Yield</th>
 			{% if show_clear %}<th><i>Clear</i></th>{% endif %}
 		</tr>
@@ -20,6 +20,7 @@
 		<td>{{ run.distance|floatformat:2 }} mi</td>
 		<td>{{ run.duration_as_string }}</td>
 		<td>{{ run.pace }}</td>
+		<td>{{ run.calories|floatformat:0 }} kcal</td>
 		<td>{% if run.average_heart_rate %} 
 			{{ run.average_heart_rate }} <sup>b</sup>&frasl;<sub>min</sub>
 			{% else %}
@@ -37,7 +38,6 @@
 			{% else %}
 			<i>None</i>
 			{% endif %}</td>
-		<td>{{ run.calories|floatformat:0 }} kcal</td>
 		<td>{% if run.average_heart_rate %} 
 			{{ run.efficiency|floatformat:3 }} <sup>m</sup>&frasl;<sub>b</sub>
 			{% else %}

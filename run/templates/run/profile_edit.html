@@ -72,7 +72,7 @@
 			</div>
 			<div class="modal-footer">
 				<a href="#" class="btn primary" onclick="javascript:$('#modal-from-dom').modal('hide')">No, don't delete my account.</a>
-				<a href="/profile/delete?really=yes" class="btn secondary danger">Yes, really delete my account.</a>
+				<a href="/{{user.username|default:'_bounce'}}/profile/delete?really=yes" class="btn secondary danger">Yes, really delete my account.</a>
 			  
 			</div>
 		</div>

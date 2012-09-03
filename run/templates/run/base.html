@@ -95,7 +95,7 @@
 				<ul class="nav">
 					<li {% block section-home %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}" accesskey="h">Home</a></li>
 					<li {% block section-profile %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/profile" accesskey="p">Profile</a></li>
-					<li {% block section-addrun %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/run/new" accesskey="a">Add Run</a></li>
+					<li {% block section-addrun %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/run/add" accesskey="a">Add Run</a></li>
 				</ul>
 				{% block login-menu %}
 				<ul class="nav secondary-nav">

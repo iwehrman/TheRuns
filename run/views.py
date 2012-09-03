@@ -828,7 +828,7 @@ def run_all(request, username):
             context,
             context_instance=RequestContext(request))
 
-def run_new(request, username):
+def run_add(request, username):
     if not is_authorized(request, username): 
         return redirect_to_login(request)
 
@@ -936,7 +936,7 @@ def run_update(request, username):
     
     return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
     
-def run_delete(request, username, run_id):
+def run_remove(request, username, run_id):
     if not is_authorized(request, username): 
         return redirect_to_login(request)
     
@@ -955,7 +955,7 @@ def run_delete(request, username, run_id):
     
 ### Shoes ###
 
-def shoe_new(request, username):
+def shoe_add(request, username):
     if not is_authorized(request, username): 
         return redirect_to_login(request)
 
@@ -1004,7 +1004,7 @@ def shoe_all(request, username):
             context, 
             context_instance=RequestContext(request))
 
-def shoe_delete(request, username, shoe_id):
+def shoe_remove(request, username, shoe_id):
     if not is_authorized(request, username):
         return redirect_to_login(request)
 
@@ -1017,30 +1017,19 @@ def shoe_delete(request, username, shoe_id):
     messages.success(request, "Shoe deleted.")
     return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
         
-def shoe_retire(request, username, shoe_id):
+def shoe_toggle(request, username, shoe_id):
     if not is_authorized(request, username):
         return redirect_to_login(request)
 
     user = request.user
     shoe = get_object_or_404(Shoe, pk=shoe_id)
-    shoe.active = False
+    shoe.active = not shoe.active
     shoe.save()
     reset_last_modified(shoe.user.id)
     
-    log.info('Retired shoe for %s: %s', user, shoe)
-    messages.success(request, "Shoe retired.")
-    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
-
-def shoe_activate(request, username, shoe_id):
-    if not is_authorized(request, username):
-        return redirect_to_login(request)
-
-    user = request.user
-    shoe = get_object_or_404(Shoe, pk=shoe_id)
-    shoe.active = True
-    shoe.save()
-    reset_last_modified(shoe.user.id)
-
-    log.info('Activated shoe for %s: %s', user, shoe)
-    messages.success(request, "Shoe activated.")
+    log.info('Toggled shoe for %s: %s', user, shoe)
+    if shoe.active: 
+        messages.success(request, "Shoe activated.")
+    else: 
+        messages.success(request, "Shoe retired.")
     return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))

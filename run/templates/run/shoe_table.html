@@ -36,14 +36,14 @@
 			{% endif %}
 			{{shoe.miles|floatformat:0}} mi</a></td>
 		{% if show_clear %}<td>{{shoe.active|yesno:"Yes,No"}}</td>{% endif %}
-		{% if shoe.active %}<td><a href="/{{user.username|default:'_bounce'}}/shoe/retire/{{shoe.id}}">Retire</a></td>
-		{% else %}<td><a href="/{{user.username|default:'_bounce'}}/shoe/activate/{{shoe.id}}">Activate</a></td>{% endif %}
+		<td><a href="/{{user.username|default:'_bounce'}}/shoe/toggle/{{shoe.id}}">
+		{% if shoe.active %}Retire{% else %}Activate{% endif%}</a></td>
 		{% if show_clear %}<td><a href="/{{user.username|default:'_bounce'}}/shoe/remove/{{shoe.id}}">Clear</a></td>{% endif %}
 	</tr>
 {% endfor %}
 {% else %}
 	<tr>
-		<td colspan="7">No shoes found. <a href="/{{user.username|default:'_bounce'}}/shoe/new">Add a new pair of shoes.</a></td>
+		<td colspan="7">No shoes found. <a href="/{{user.username|default:'_bounce'}}/shoe/add">Add a new pair of shoes.</a></td>
 	</tr>
 {% endif %}
 </table>

@@ -272,7 +272,13 @@ def splash(request):
         
 def __index_generic(request, user):
     start = datetime.datetime.now()
+
     today = date.today()
+    if 'today' in request.GET: 
+        try: 
+            today = datetime.datetime.strptime(request.GET['today'], "%Y-%m-%d")
+        except ValueError as e: 
+            log.warn("Unable to parse date on index for %s: %s", user.username, e)
     
     scale = 12
     if 'scale' in request.GET: 

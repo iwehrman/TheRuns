@@ -138,8 +138,8 @@ class ImportForm(Form):
                 return [obj_to_run(obj) for obj in json_objs]
 
             except Exception as e:
-                            log.info("ValidationError: %s", str(e))
-                            raise ValidationError("Unable to parse JSON file. Error: %s." % str(e))
+                log.info("ValidationError: %s", str(e))
+                raise ValidationError("Unable to parse JSON file. Error: %s." % str(e))
 
     
     data_file = ImportableFileField(widget=FileInput(attrs={'tabindex': '1'}),

@@ -23,7 +23,7 @@ from recaptcha import RecaptchaClient
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, NewUserForm, UserProfileForm, ImportForm
 
-BASE_URI = "http://run.wehrman.me"
+BASE_URI = "http://get.theruns.in"
 
 log = logging.getLogger(__name__)
 

@@ -62,9 +62,9 @@ class NewUserForm(ModelForm):
     def clean_username(self): 
         username = self.cleaned_data['username']
 
-        if username = '': 
+        if username == '': 
             raise forms.ValidationError("Username must not be empty.")
-        elif username[0] = '_': 
+        elif username[0] == '_': 
             raise forms.ValidationError("Username must not begin with an underscore.")
 
         try: 

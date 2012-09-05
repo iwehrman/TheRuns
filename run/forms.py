@@ -61,6 +61,12 @@ class NewUserForm(ModelForm):
         
     def clean_username(self): 
         username = self.cleaned_data['username']
+
+        if username = '': 
+            raise forms.ValidationError("Username must not be empty.")
+        elif username[0] = '_': 
+            raise forms.ValidationError("Username must not begin with an underscore.")
+
         try: 
             user = User.objects.get(username=username)
             # a user with this username already exists; raise an exception. 

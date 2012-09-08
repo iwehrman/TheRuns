@@ -638,7 +638,7 @@ def password_reset_start(request):
             short_url = reverse('run.views.password_reset_finish')
             # short_uri = request.build_absolute_uri(short_url)
             short_uri = BASE_URI + short_url
-            params = urlencode({'u': username, 'k': key})
+            params = urlencode({'u': user.username, 'k': key})
             full_url = short_url + '?%s' % params
             # full_uri = request.build_absolute_uri(full_url)
             full_uri = BASE_URI + full_url

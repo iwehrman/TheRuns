@@ -31,17 +31,22 @@ log = logging.getLogger(__name__)
 recaptcha_client = RecaptchaClient('6LeP-tUSAAAAABJA06RqAXcoPsIpaGfvhvlyRPUA', 
     '6LeP-tUSAAAAAPnvQazfnpwwIY7NnUxINzWTIv5K')
 
-WEEK_AG_PREFIX = 'WEEK_AG'
-MONTH_AG_PREFIX = 'MONTH_AG'
+WEEK_USER_AG_PREFIX = 'WEEK_AG'
+MONTH_USER_AG_PREFIX = 'MONTH_AG'
+WEEK_ALL_AG_PREFIX = 'WEEK_ALL_AG'
+MONTH_ALL_AG_PREFIX = 'MONTH_ALL_AG'
 LM_PREFIX = 'LM'
 FIRST_PREFIX = 'FIRST'
 
 ONE_DAY = timedelta(days=1)
 ONE_WEEK = timedelta(days=7)
 
-def ag_cache_key(prefix, userid, date): 
-    return "%s_%d_%d_%d_%d" % (prefix, userid, date.year, date.month, date.day)
-        
+def ag_cache_key(prefix, user, date): 
+    if user: 
+        return "%s_%d_%d_%d_%d" % (prefix, user.id, date.year, date.month, date.day)
+    else: 
+        return "%s_%d_%d_%d" % (prefix, date.year, date.month, date.day)
+
 def lm_cache_key(userid):
     return "%s_%d" % (LM_PREFIX,userid)
     
@@ -61,8 +66,12 @@ def aggregate_runs(user, first_day, last_day):
     minimum = MAX_CONST
     maximum = 0
 
-    runs = (Run.objects.filter(user=user.id)
-        .filter(date__gte=first_day).filter(date__lte=last_day))
+    if user: 
+        runs = (Run.objects.filter(user=user.id)
+            .filter(date__gte=first_day).filter(date__lte=last_day))
+    else: # user == None means aggregate all users
+        runs = (Run.objects.all()
+            .filter(date__gte=first_day).filter(date__lte=last_day))
 
     for run in runs: 
         duration += run.duration_in_seconds()
@@ -103,7 +112,6 @@ def aggregate_runs(user, first_day, last_day):
         efficiency = None
         
     ag = Aggregate()
-    ag.user = user
     ag.distance = distance
     ag.minimum = minimum
     ag.maximum = maximum 
@@ -116,12 +124,20 @@ def aggregate_runs(user, first_day, last_day):
     ag.last_date = last_day
     ag.heart_rate = heart_rate
     ag.beats_per_second = beats_per_second
-    ag.save()
+
+    if user: # if aggregating all users, don't store in DB
+        ag.user = user
+        ag.save()
+
     return ag
     
 def get_aggregate_from_db(user, first_date, last_date):
-    ags = Aggregate.objects.filter(user=user.id, 
-        first_date=first_date, last_date=last_date)
+    if user: 
+        ags = Aggregate.objects.filter(user=user.id, 
+            first_date=first_date, last_date=last_date)
+    else: # aggregates for everyone not stored in DB
+        ags = []
+
     if len(ags) == 1:
         # log.debug("Aggregate DB HIT: %s" % ags[0])
         return ags[0]
@@ -130,7 +146,10 @@ def get_aggregate_from_db(user, first_date, last_date):
         log.info("Aggregate DB MISS: %s" % ag)
         return ag
     else: 
-        raise Exception("Multiple agregates for %s at %s - %s" % 
+        # FYI: this has happened at least once, but I'm not sure why. 
+        # It might be wise to just invalidate the cache and regenerate the 
+        # aggregates from the DB
+        raise Exception("Multiple aggregates for %s at %s - %s" % 
             (user.username, first_date, last_date))
             
 def invalidate_cache(user, date):
@@ -138,10 +157,10 @@ def invalidate_cache(user, date):
     ags = Aggregate.objects.filter(user=user.id,first_date__lte=date,
         last_date__gte=date)
     
-    week_keys = [ag_cache_key(WEEK_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    week_keys = [ag_cache_key(WEEK_USER_AG_PREFIX,user,ag.first_date) for ag in ags]
     log.info("Evicting %s from week_cache", cache.get_many(week_keys))
     cache.delete_many(week_keys)
-    month_keys = [ag_cache_key(MONTH_AG_PREFIX,user.id,ag.first_date) for ag in ags]
+    month_keys = [ag_cache_key(MONTH_USER_AG_PREFIX,user,ag.first_date) for ag in ags]
     log.info("Evicting %s from month_cache", cache.get_many(month_keys))
     cache.delete_many(month_keys)
 
@@ -154,14 +173,18 @@ def invalidate_cache(user, date):
         cache.delete(key)
 
 def get_aggregate_generic(prefix, user, first_date, last_date): 
-    key = ag_cache_key(prefix, user.id, first_date)
+    key = ag_cache_key(prefix, user, first_date)
     ag = cache.get(key)
     if ag: 
         # log.debug("Aggregate CACHE HIT: %s" % ag)
         return ag
     else: 
+        if user: 
+            username = user.username
+        else: 
+            username = "_everybody"
         log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
-            (user.username, first_date, last_date))
+            (username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
         
         # # FIXME this should be done before putting the aggregates in the db
@@ -173,10 +196,16 @@ def get_aggregate_generic(prefix, user, first_date, last_date):
         return ag
 
 def get_week_aggregate(user, first_date, last_date):
-    return get_aggregate_generic(WEEK_AG_PREFIX, user, first_date, last_date) 
+    if user: 
+        return get_aggregate_generic(WEEK_USER_AG_PREFIX, user, first_date, last_date) 
+    else: 
+        return get_aggregate_generic(WEEK_ALL_AG_PREFIX, None, first_date, last_date) 
 
 def get_month_aggregate(user, first_date, last_date):
-    return get_aggregate_generic(MONTH_AG_PREFIX, user, first_date, last_date) 
+    if user: 
+        return get_aggregate_generic(MONTH_USER_AG_PREFIX, user, first_date, last_date) 
+    else: 
+        return get_aggregate_generic(MONTH_ALL_AG_PREFIX, None, first_date, last_date) 
 
 
 def index_last_modified_user(request, user): 
@@ -275,7 +304,8 @@ def do_splash(request):
 def do_about(request): 
     return render_to_response('run/about.html', {}, 
         context_instance=RequestContext(request))
-        
+
+
 def __index_generic(request, user):
     start = datetime.datetime.now()
 
@@ -284,7 +314,7 @@ def __index_generic(request, user):
         try: 
             today = datetime.datetime.strptime(request.GET['today'], "%Y-%m-%d")
         except ValueError as e: 
-            log.warn("Unable to parse date on index for %s: %s", user.username, e)
+            log.warn("Unable to parse date on index for user %s: %s", user, e)
     
     scale = 12
     if 'scale' in request.GET: 
@@ -298,6 +328,11 @@ def __index_generic(request, user):
     all_weeks = get_aggregates_by_week(user, today, scale)
     all_months = get_aggregates_by_month(user, today, scale)
         
+    if user: 
+        username = user.username
+    else: 
+        username = "_everybody"
+
     log.debug('Index time for %s: %s', user, (datetime.datetime.now() - start))
         
     context = {'this_week': all_weeks[0],
@@ -308,7 +343,13 @@ def __index_generic(request, user):
         'all_months': all_months,
     }
 
-    if request.user == user:
+    if not user: # i.e., all users
+        sameuser = False
+        has_run = "everyone's run"
+        did_run = "everyone's ran"
+        has_not_run = "nobody's run"
+        did_not_run = "nobody's run"
+    elif request.user == user:
         sameuser = True
         has_run = "you've run"
         did_run = "you ran"
@@ -335,6 +376,10 @@ def __index_generic(request, user):
         
     return render_to_response('run/index.html', context, 
         context_instance=RequestContext(request))
+
+@cache_control(must_revalidate=True)
+def everyone(request): 
+    return __index_generic(request, None)
         
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_username)

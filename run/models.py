@@ -312,7 +312,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 post_save.connect(create_user_profile, sender=User)
 
 class Aggregate(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User,null=True)
     first_date = models.DateField()
     last_date = models.DateField()
     pace = models.CharField(max_length=10,blank=True, null=True)
@@ -327,6 +327,10 @@ class Aggregate(models.Model):
     beats_per_second = models.DecimalField(max_digits=5,decimal_places=3,blank=True, null=True)
         
     def __unicode__(self):
-        return "%s: %s - %s" % (self.user.username, self.first_date, self.last_date)
+        if self.user: 
+            username = self.user.username
+        else: 
+            username = "_everybody"
+        return "%s: %s - %s" % (username, self.first_date, self.last_date)
     
     

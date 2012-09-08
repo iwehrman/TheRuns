@@ -24,6 +24,7 @@ from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
 from run.forms import UserForm, NewUserForm, UserProfileForm, ImportForm
 
 BASE_URI = "http://get.theruns.in"
+MAIL_FROM_ADDR = "admin@theruns.in"
 
 log = logging.getLogger(__name__)
 
@@ -590,57 +591,78 @@ def do_export(request, username):
     
     
 def password_reset_start(request):
+    context = {}
     if request.method == 'GET': 
         if 'resetusername' in request.session: 
-            context = {'username': request.session['resetusername']}
-        else: 
-            context = {}
+            context['username'] = request.session['resetusername']
         return render_to_response('run/reset_start.html', context,
             context_instance=RequestContext(request))
+
     elif request.method == 'POST': 
         if 'username' in request.POST and len(request.POST['username']) > 0: 
             username = request.POST['username']
-            request.session['resetusername'] = username
+            context['username'] = username
+        else: 
+            username = None
+
+        if 'email' in request.POST and len(request.POST['email']) > 0: 
+            email = request.POST['email']
+            context['email'] = email
+        else: 
+            email = None
+
+        if username or email: 
+            try:
+                if username and email:
+                    user = User.objects.get(username__exact=username, email__exact=email)
+                elif username: 
+                    user = User.objects.get(username__exact=username)
+                else: 
+                    user = User.objects.get(email__exact=email)
+            except User.DoesNotExist: 
+                if not email:
+                    messages.error(request, "User '%s' not found." % username)
+                elif not username: 
+                    messages.error(request, "Email address '%s' not found." % email)
+                else: 
+                    messages.error(request, "User '%s <%s>' not found." % (username, email))
+                return render_to_response('run/reset_start.html', context, 
+                    context_instance=RequestContext(request))
+            
+            key = str(random.randint(100000,999999))
+            request.session['resetkey'] = key
+    
+            to_addr = user.email
+            recipient_list = [to_addr]
+            subject = 'Password reset request'
+            short_url = reverse('run.views.password_reset_finish')
+            # short_uri = request.build_absolute_uri(short_url)
+            short_uri = BASE_URI + short_url
+            params = urlencode({'u': username, 'k': key})
+            full_url = short_url + '?%s' % params
+            # full_uri = request.build_absolute_uri(full_url)
+            full_uri = BASE_URI + full_url
+            body = ('Howdy ' + user.first_name + ',\n\n' + 
+                'To reset the password for user ' + user.username + 
+                ' at The Runs, return to ' + short_uri +
+                ' and enter the key ' + key + 
+                ', or just click here: ' + full_uri)
             
             try:
-                user = User.objects.get(username__exact=username)
-                key = str(random.randint(100000,999999))
-                request.session['resetkey'] = key
-        
-                from_addr = 'run@wehrman.me'
-                to_addr = user.email
-                recipient_list = [to_addr]
-                subject = 'Password reset request'
-                short_url = reverse('run.views.password_reset_finish')
-                # short_uri = request.build_absolute_uri(short_url)
-                short_uri = BASE_URI + short_url
-                params = urlencode({'u': username, 'k': key})
-                full_url = short_url + '?%s' % params
-                # full_uri = request.build_absolute_uri(full_url)
-                full_uri = BASE_URI + full_url
-                body = ('Howdy ' + user.first_name + ',\n\n' + 
-                    'To reset the password for user ' + username + 
-                    ' at The Runs, return to ' + short_uri +
-                    ' and enter the key ' + key + 
-                    ', or just click here: ' + full_uri)
-            
-                send_mail(subject, body, from_addr, recipient_list)
-
+                send_mail(subject, body, MAIL_FROM_ADDR, recipient_list)
                 log.info("Password reset email sent for %s to %s", user, user.email)
                 messages.success(request, 'An email has been sent to you with a key. ' +  
                     'Enter it below to reset your password.')
-            
+               
                 return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
-            except User.DoesNotExist: 
-                messages.error(request, "User '%s' not found." % username)
             except Exception as e: 
-                messages.error(request, "Unable to request password reset: %s", e)
+                messages.error(request, "Unable to send email to: %s", to_addr)
                 log.error(e)
-        
-            return render_to_response('run/reset_start.html', 
-                context_instance=RequestContext(request))
+                return render_to_response('run/reset_start.html', context, 
+                    context_instance=RequestContext(request))
         else: 
-            return render_to_response('run/reset_start.html', 
+            messages.error(request, "No username or email address provided.")
+            return render_to_response('run/reset_start.html', context,
                 context_instance=RequestContext(request))
     
 def password_reset_finish(request):

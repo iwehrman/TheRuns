@@ -36,6 +36,7 @@ MONTH_USER_AG_PREFIX = 'MONTH_AG'
 WEEK_ALL_AG_PREFIX = 'WEEK_ALL_AG'
 MONTH_ALL_AG_PREFIX = 'MONTH_ALL_AG'
 LM_PREFIX = 'LM'
+LM_ALL_PREFIX = 'LM_ALL'
 FIRST_PREFIX = 'FIRST'
 
 ONE_DAY = timedelta(days=1)
@@ -47,8 +48,11 @@ def ag_cache_key(prefix, user, date):
     else: 
         return "%s_%d_%d_%d" % (prefix, date.year, date.month, date.day)
 
-def lm_cache_key(userid):
-    return "%s_%d" % (LM_PREFIX,userid)
+def lm_cache_key(user):
+    if user: 
+        return "%s_%d" % (LM_PREFIX,user.id)
+    else: 
+        return LM_ALL_PREFIX
     
 def first_date_cache_key(userid):
     return "%s_%d" % (FIRST_PREFIX, userid)
@@ -112,6 +116,7 @@ def aggregate_runs(user, first_day, last_day):
         efficiency = None
         
     ag = Aggregate()
+    ag.user = user
     ag.distance = distance
     ag.minimum = minimum
     ag.maximum = maximum 
@@ -125,9 +130,7 @@ def aggregate_runs(user, first_day, last_day):
     ag.heart_rate = heart_rate
     ag.beats_per_second = beats_per_second
 
-    if user: # if aggregating all users, don't store in DB
-        ag.user = user
-        ag.save()
+    ag.save()
 
     return ag
     
@@ -135,8 +138,9 @@ def get_aggregate_from_db(user, first_date, last_date):
     if user: 
         ags = Aggregate.objects.filter(user=user.id, 
             first_date=first_date, last_date=last_date)
-    else: # aggregates for everyone not stored in DB
-        ags = []
+    else: 
+        ags = Aggregate.objects.filter(user=None, 
+            first_date=first_date, last_date=last_date)
 
     if len(ags) == 1:
         # log.debug("Aggregate DB HIT: %s" % ags[0])
@@ -150,10 +154,10 @@ def get_aggregate_from_db(user, first_date, last_date):
         # It might be wise to just invalidate the cache and regenerate the 
         # aggregates from the DB
         raise Exception("Multiple aggregates for %s at %s - %s" % 
-            (user.username, first_date, last_date))
+            (user, first_date, last_date))
             
 def invalidate_cache(user, date):
-    # invalidate aggregates
+    # invalidate user aggregates
     ags = Aggregate.objects.filter(user=user.id,first_date__lte=date,
         last_date__gte=date)
     
@@ -165,12 +169,32 @@ def invalidate_cache(user, date):
     cache.delete_many(month_keys)
 
     ags.delete()
-    
+
     # invalidate first-date 
     key = first_date_cache_key(user.id)
     first_date = cache.get(key)
     if first_date and first_date < date: 
         cache.delete(key)
+
+    # clear user's lm date 
+    reset_last_modified(user)
+
+    # invalidate _we aggregates
+    ags = Aggregate.objects.filter(user=None,first_date__lte=date,
+        last_date__gte=date)
+    
+    week_keys = [ag_cache_key(WEEK_ALL_AG_PREFIX,None,ag.first_date) for ag in ags]
+    log.info("Evicting %s from week_cache", cache.get_many(week_keys))
+    cache.delete_many(week_keys)
+    month_keys = [ag_cache_key(MONTH_ALL_AG_PREFIX,None,ag.first_date) for ag in ags]
+    log.info("Evicting %s from month_cache", cache.get_many(month_keys))
+    cache.delete_many(month_keys)
+
+    ags.delete()
+
+    # also reset the lm cache
+    key = lm_cache_key(None)
+    cache.delete(key)
 
 def get_aggregate_generic(prefix, user, first_date, last_date): 
     key = ag_cache_key(prefix, user, first_date)
@@ -182,7 +206,8 @@ def get_aggregate_generic(prefix, user, first_date, last_date):
         if user: 
             username = user.username
         else: 
-            username = "_everybody"
+            username = None
+        
         log.debug("Aggregate CACHE MISS: %s: %s - %s" % 
             (username, first_date, last_date))
         ag = get_aggregate_from_db(user, first_date, last_date)
@@ -218,11 +243,10 @@ def index_last_modified_user(request, user):
     
     this_morning = datetime.datetime.now().replace(hour=0,minute=0,second=0)
 
-    if user.is_anonymous():
+    if user and user.is_anonymous():
         return this_morning
     else: 
-        userid = user.id
-        key = lm_cache_key(userid)
+        key = lm_cache_key(user)
         lm = cache.get(key)
         if not lm: 
             lm = datetime.datetime.now()
@@ -236,16 +260,26 @@ def index_last_modified_user(request, user):
         return max(this_morning, lm)
 
 def index_last_modified_username(request, username):
-    user = User.objects.get(username=username)
-    return index_last_modified_user(request, user)
+    try: 
+        user = User.objects.get(username=username)
+        return index_last_modified_user(request, user)
+    except User.DoesNotExist: 
+        return datetime.datetime.now()
     
 def index_last_modified_default(request, username=None): 
     # ignore the username; we want to base decisions on the current user
     return index_last_modified_user(request, request.user)
-    
-def reset_last_modified(userid):
-    key = lm_cache_key(userid)
-    cache.delete(key)
+
+def index_last_modified_any(request): 
+    return index_last_modified_user(request, None)
+
+    this_morning = datetime.datetime.now().replace(hour=0,minute=0,second=0)
+    return max(thismorning, lm)
+
+def reset_last_modified(user):
+    if user: 
+        key = lm_cache_key(user)
+        cache.delete(key)
     
 def surrounding_week(start):
     last_monday = start - (ONE_DAY * start.weekday())
@@ -331,11 +365,12 @@ def __index_generic(request, user):
     if user: 
         username = user.username
     else: 
-        username = "_everybody"
+        username = None
 
-    log.debug('Index time for %s: %s', user, (datetime.datetime.now() - start))
+    log.debug('Index time for %s: %s', username, (datetime.datetime.now() - start))
         
-    context = {'this_week': all_weeks[0],
+    context = {'theuser' : user,
+        'this_week': all_weeks[0],
         'last_week': all_weeks[1], 
         'all_weeks': all_weeks,
         'this_month': all_months[0], 
@@ -345,10 +380,10 @@ def __index_generic(request, user):
 
     if not user: # i.e., all users
         sameuser = False
-        has_run = "everyone's run"
-        did_run = "everyone's ran"
-        has_not_run = "nobody's run"
-        did_not_run = "nobody's run"
+        has_run = "we've all run"
+        did_run = "we all ran"
+        has_not_run = "we haven't run"
+        did_not_run = "we didn't run"
     elif request.user == user:
         sameuser = True
         has_run = "you've run"
@@ -378,7 +413,8 @@ def __index_generic(request, user):
         context_instance=RequestContext(request))
 
 @cache_control(must_revalidate=True)
-def everyone(request): 
+@condition(etag_func=None,last_modified_func=index_last_modified_any)
+def do_we(request): 
     return __index_generic(request, None)
         
 @cache_control(must_revalidate=True)
@@ -601,7 +637,6 @@ def do_import(request, username):
                     log.debug("Importing run %s", run)
                     run.save()
                     
-                    reset_last_modified(user.id)
                     invalidate_cache(user, run.date)
                     
                 messages.success(request, "Data imported successfully.")
@@ -773,7 +808,7 @@ def do_signup(request):
             user.save()
             user = authenticate(username=uform.cleaned_data['username'], password=np2)
             login(request, user)
-            reset_last_modified(user.id)
+            reset_last_modified(user)
             
             messages.success(request, 'Your account has been created! Next, update the rest of your profile information below.')
             log.info("Created account for %s (%s)", user, user.email)
@@ -823,7 +858,7 @@ def userprofile_update(request, username):
                 user.set_password(np2)
             uform.save()
             pform.save()
-            reset_last_modified(user.id)
+            reset_last_modified(user)
             
             messages.success(request, "Profile updated successfully.")
             log.info("Updated profile for %s: %s", user, user.get_profile())
@@ -988,7 +1023,6 @@ def run_update(request, username):
     run.set_zone()
     run.save()
     
-    reset_last_modified(user.id)
     invalidate_cache(user, run.date)
 
     if shoe: 
@@ -1012,7 +1046,6 @@ def run_remove(request, username, run_id):
     log.info('Deleting run for %s: %s', user, run)
     run.delete()
     
-    reset_last_modified(run.user.id)
     invalidate_cache(run.user, run.date)
     
     messages.success(request, "Deleted run.")
@@ -1041,7 +1074,7 @@ def shoe_add(request, username):
                 context_instance=RequestContext(request))
         shoe.active = True
         shoe.save()
-        reset_last_modified(user.id)
+        reset_last_modified(user)
 
         log.info('Added shoe for %s: %s', user, shoe)
         messages.success(request, "Shoe added.")
@@ -1079,7 +1112,7 @@ def shoe_remove(request, username, shoe_id):
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     log.info('Deleting shoe for %s: %s', user, shoe)
     shoe.delete()
-    reset_last_modified(shoe.user.id)
+    reset_last_modified(shoe.user)
     
     messages.success(request, "Shoe deleted.")
     return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
@@ -1092,7 +1125,7 @@ def shoe_toggle(request, username, shoe_id):
     shoe = get_object_or_404(Shoe, pk=shoe_id)
     shoe.active = not shoe.active
     shoe.save()
-    reset_last_modified(shoe.user.id)
+    reset_last_modified(shoe.user)
     
     log.info('Toggled shoe for %s: %s', user, shoe)
     if shoe.active: 

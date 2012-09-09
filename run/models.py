@@ -330,7 +330,7 @@ class Aggregate(models.Model):
         if self.user: 
             username = self.user.username
         else: 
-            username = "_everybody"
+            username = None
         return "%s: %s - %s" % (username, self.first_date, self.last_date)
     
     

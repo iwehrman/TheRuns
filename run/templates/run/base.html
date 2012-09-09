@@ -94,15 +94,15 @@
 			<div class="container-fluid">
 				<a class="brand tk-museo" href="/">The Runs</a>
 				<ul class="nav">
-					<li {% block section-home %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}" accesskey="h">Home</a></li>
-					<li {% block section-profile %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/profile" accesskey="p">Profile</a></li>
+					<li {% block section-home %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/" accesskey="h">Home</a></li>
+					<li {% block section-profile %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/profile/" accesskey="p">Profile</a></li>
 					<li {% block section-addrun %}{%endblock%}><a href="/{{user.username|default:'_bounce'}}/run/add" accesskey="a">Add Run</a></li>
 				</ul>
 				{% block login-menu %}
 				<ul class="nav secondary-nav">
 					{% if user.is_authenticated %}
 					<li class="dropdown"> 
-						<a href="/{{user.username|default:'_bounce'}}" class="dropdown-toggle">Logged in: {{user.username}}</a>
+						<a href="/{{user.username|default:'_bounce'}}/" class="dropdown-toggle">Logged in: {{user.username}}</a>
 						<ul class="dropdown-menu">
 							<!--li><a href="/_about">About</a></li>
 							<li class="divider"></li-->
@@ -110,11 +110,11 @@
 							<li><a href="/{{user.username|default:'_bounce'}}/import">Import...</a></li>
 							<li><a href="/{{user.username|default:'_bounce'}}/export">Export</a></li>
 							<li class="divider"></li>
-							<li><a href="/_logout">Logout</a></li>
+							<li><a href="/_logout/">Logout</a></li>
 						</ul>
 					</li>
 					{% else %}
-					<a href="/_login">Log in...</a>
+					<a href="/_login/">Log in...</a>
 					{% endif %}
 				</ul>
 				{% endblock login-menu %}

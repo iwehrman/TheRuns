@@ -14,78 +14,102 @@
 
 {% block main_14 %}
 	
-	{% if profile %}
-		
-		<form action="/{{user.username|default:'_bounce'}}/run/update" method="post">
+		<form action="/{{user.username|default:'_bounce'}}/run/add" method="post">
 		<fieldset>
 		<legend> Record a new run </legend>
 
-		<div class="clearfix">
-			<label for="date_day">Date</label>
+ 		{{ form.non_field_errors }}
+
+		<div class="clearfix 
+			{% if form.date.errors %}error
+			{% elif form.date_month.errors %}error
+			{% elif form.date_day.errors %}error
+			{% elif form.date_year.errors %}error{% endif %}">
+			<label for="form.date_month.auto_id">Date</label>
 			<div class="input">
 				<input type="text" name="date_month" id="date_month" 
-					class = "mini" value="{% now "n" %}" tabindex="1">
+					class = "mini" value="{{ form.date_month.value }}" tabindex="1">
 				<input type="text" name="date_day" id="date_day" 
-					class = "mini" value="{% now "j" %}" tabindex="2">
+					class = "mini" value="{{ form.date_day.value }}" tabindex="2">
 				<input type="text" name="date_year" id="date_year" 
-					class = "mini" value="{% now "Y" %}" tabindex="3">
+					class = "mini" value="{{ form.date_year.value }}" tabindex="3">
+				{{ form.date.errors }}
+				{{ form.date_month.errors }}
+				{{ form.date_day.errors }}
+				{{ form.date_year.errors }}
 			</div>
 		</div>
 
-		<div class="clearfix">
+		<div class="clearfix
+			{% if form.duration_hours.errors %}error
+			{% elif form.duration_minutes.errors %}error
+			{% elif form.duration_seconds.errors %}error{% endif %}">
 			<label for="duration_minutes">Duration</label>
 			<div class="input">
 				<input type="text" name="duration_hours" 
 					id="duration_hours" class="mini" placeholder="HH" 
+					{% if form.duration_hours.value %}value="{{form.duration_hours.value}}"{% endif %}
 					tabindex="4"/>	
 				<input type="text" name="duration_minutes" 
 					id="duration_minutes" class="mini" placeholder="MM" 
+					{% if form.duration_minutes.value %}value="{{form.duration_minutes.value}}"{% endif %}
 					tabindex="5"/>
 				<input type="text" name="duration_seconds" 
 					id="duration_seconds" class="mini" placeholder="SS" 
+					{% if form.duration_seconds.value %}value="{{form.duration_seconds.value}}"{% endif %}
 					tabindex="6"/>
+					{{ form.duration.errors }}
+					{{ form.duration_hours.errors }}
+					{{ form.duration_minutes.errors }}
+					{{ form.duration_seconds.errors }}
 			</div>
 		</div>
 
-		<div class="clearfix">
+		<div class="clearfix {% if form.average_heart_rate.errors %}error{% endif %}">
 			<label for="average_heart_rate">Heart rate</label>
 			<div class="input">
 				<input type="text" name="average_heart_rate" 
-					id="average_heart_rate" class="mini" tabindex="7" placeholder="123">
+					id="average_heart_rate" class="mini" tabindex="7" placeholder="123"
+					{% if form.average_heart_rate.value %}value="{{form.average_heart_rate.value}}"{% endif %}>
+				{{ form.average_heart_rate.errors }}
 			</div>
 		</div>
 
-		<div class="clearfix">
+		<div class="clearfix {% if form.distance.errors %}error{% endif %}">
 			<label for="distance">Distance</label>
 			<div class="input">
 				<input type="text" name="distance" id="distance" class="mini"  
-					tabindex="8" placeholder="4.56">
+					tabindex="8" placeholder="4.56"
+					{% if form.distance.value %}value="{{form.distance.value}}"{% endif %}>
+				{{ form.distance.errors }}
 		    </div>	
 		</div>
 
-		<div class="clearfix">
+		<div class="clearfix {% if form.shoe.errors %}error{% endif %}">
 			<label for="shoe">Shoe</label>
 			<div class="input">
 				<select name="shoe" id="shoe" class="span6" tabindex="9">
 					<option value="">None</option>
-				{% for shoe in shoes %}
-					<option value="{{ shoe.id }}"
-						{% if shoe.id == profile.last_shoe.id %}
+				{% for sh in form.fields.shoe.queryset %}
+					<option value="{{ sh.id }}"
+						{% ifequal sh.id|stringformat:"s" form.shoe.value|stringformat:"s" %}
 							selected="selected"
-						{% endif %}>
-						{{ shoe.make }} {{ shoe.model }} 
-						({{ shoe.miles|floatformat:0 }} mi)
+						{% endifequal %}>
+						{{ sh.make }} {{ sh.model }} 
+						({{ sh.miles|floatformat:0 }} mi)
 					</option>
 				{% endfor %}
 				</select>
+				{{ form.shoe.errors }}
 			</div>
 		</div>
 
 		<div class="clearfix">
 			<div class="input">
 				{% csrf_token %}
-				<input type="hidden" name="userprofile" 
-					value="{{ profile.id}}" />
+				<input type="hidden" name="user" value="{{user.id}}" />
+				<input type="hidden" name="date" value="{{form.date.value}}" />
+				<input type="hidden" name="duration" value="{{form.duration.value}}" />
 				<input type="submit" class="btn primary" value="Add Run" 
 					tabindex="10"/>
 			</div>
@@ -93,9 +117,5 @@
 
 		</fieldset>
 		</form>
-		
-	{% else %}
-		<p>No such profile.</p>
-	{% endif %}
 
 {% endblock main_14 %}

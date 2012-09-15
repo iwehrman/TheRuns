@@ -21,7 +21,7 @@ from django_recaptcha_field import create_form_subclass_with_recaptcha
 from recaptcha import RecaptchaClient
 
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
-from run.forms import UserForm, NewUserForm, UserProfileForm, ImportForm
+from run.forms import RunForm, UserForm, NewUserForm, UserProfileForm, ImportForm
 
 BASE_URI = "http://get.theruns.in"
 MAIL_FROM_ADDR = "admin@theruns.in"
@@ -414,7 +414,7 @@ def __index_generic(request, user):
 
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_any)
-def do_we(request): 
+def index_all(request): 
     return __index_generic(request, None)
         
 @cache_control(must_revalidate=True)
@@ -445,7 +445,7 @@ def date_of_first_run(user):
     
 @cache_control(must_revalidate=True)
 @condition(etag_func=None,last_modified_func=index_last_modified_username)
-def all_user(request, username):
+def history_user(request, username):
     user = User.objects.get(username=username)
     
     sameuser = (request.user == user)
@@ -619,9 +619,6 @@ def do_import(request, username):
                 really = form.cleaned_data['really_erase']
                 runs = form.cleaned_data['data_file']
                 
-                log.debug("erase %s", erase)
-                log.debug("really %s", really)
-
                 # delete existing runs if the user really wants to
                 if erase and really: 
                     existing = Run.objects.filter(user=user.id)
@@ -938,105 +935,59 @@ def run_add(request, username):
     if incomplete_profile(user):
         messages.info(request, 'You must complete your profile before adding a run.')
         return HttpResponseRedirect(reverse('run.views.userprofile_update', args=[user.username]))
+
+    if request.method == 'POST': 
+
+        form = RunForm(request.POST)
+        if form.is_valid(): 
+            run = form.instance
+            # run.date = form.cleaned_data['date']
+            # run.duration = form.cleaned_data['duration']
+            run.set_calories() 
+            run.set_zone()
+            form.save()
+            
+            invalidate_cache(user, form.cleaned_data['date'])
+            shoe = form.cleaned_data['shoe']
+
+            if shoe: 
+                shoe.miles += Decimal(form.cleaned_data['distance'])
+                shoe.save()
+
+                profile = user.get_profile()
+                profile.last_shoe = shoe
+                profile.save()
+                
+            log.info('Added run for %s: %s', user, form.instance)
+            messages.success(request, "Added run " + str(form.instance) + ".")
+            
+            return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
+        else: 
+            log.debug("invalid form", form.errors)
+
     else: 
         p = user.get_profile()
-        s = Shoe.objects.filter(user=p.id)
-        context = {'profile': p, 'shoes': s}
-        return render_to_response('run/run_edit.html', 
-            context,
-            context_instance=RequestContext(request))
-    
-def run_update(request, username): 
-    if not is_authorized(request, username):
-        return redirect_to_login(request)
-    
-    run = Run()
-    post = request.POST
-    profile = get_object_or_404(UserProfile, pk=post['userprofile'])
-    user = profile.user
-    run.user = user
-    
-    try: 
-        date = datetime.date(int(post['date_year']), 
-            int(post['date_month']), int(post['date_day']))
-        run.date = date
-    except ValueError: 
-        return render_to_response('run/run_edit.html', 
-            {'profile': profile, 'error_message': 'Bad date.'}, 
-            context_instance=RequestContext(request))
-
-    try:
-        if (post['duration_hours']):
-            d_hours = int(post['duration_hours'])
-        else: 
-            d_hours = 0
-            
-        if (post['duration_minutes']):
-            d_minutes = int(post['duration_minutes'])
-        else: 
-            d_minutes = 0
-
-        if (post['duration_seconds']):
-            d_seconds = int(post['duration_seconds'])
-        else:
-            d_seconds = 0
-            
-        run.set_duration(d_hours, d_minutes, d_seconds)
-    except ValueError: 
-        return render_to_response('run/run_edit.html', 
-            {'profile': profile, 'error_message': 'Bad duration.'}, 
-            context_instance=RequestContext(request))
-    
-    try:
-        if (post['distance']):
-            run.distance = post['distance']
-        else: 
-            return render_to_response('run/run_edit.html', 
-                {'profile': profile, 'error_message': 'Distance must be set.'}, 
-                context_instance=RequestContext(request))
-    except ValueError: 
-        return render_to_response('run/run_edit.html', 
-            {'profile': profile, 'error_message': 'Bad distance.'}, 
-            context_instance=RequestContext(request))
-
-    shoe = None
-    try:
-        if (post['shoe']):
-            shoe = Shoe.objects.get(pk=int(post['shoe']))
-            # profile.last_shoe = shoe
-            # shoe.miles += run.distance
-            run.shoe = shoe
-    except Shoe.DoesNotExist: 
-        return render_to_response('run/run_edit.html', 
-            {'profile': profile, 'error_message': 'Bad shoe id'}, 
-            context_instance=RequestContext(request))
-
-    try:
-        if (post['average_heart_rate']):
-            run.average_heart_rate = int(post['average_heart_rate'])
-    except ValueError: 
-        return render_to_response('run/run_edit.html', 
-            {'profile': profile, 'error_message': 'Bad average heart rate.'}, 
-            context_instance=RequestContext(request))
-    
-    run.set_calories() 
-    run.set_zone()
-    run.save()
-    
-    invalidate_cache(user, run.date)
-
-    if shoe: 
-        shoe.miles += Decimal(run.distance)
-        profile.last_shoe = shoe
-        shoe.save()
-        profile.save()
         
-    log.info('Added run for %s: %s', user, run)
-        
-    messages.success(request, "Added run " + str(run) + ".")
+
+        today = datetime.datetime.today()
+        initial={'user' : request.user.id, 
+            'date_month' : today.month,
+            'date_day' : today.day,
+            'date_year' : today.year,
+            'shoe' : p.last_shoe, 
+            'date' : today.strftime("%m/%d/%Y"),
+            'duration' : datetime.time(0,0,0,0).strftime("%H:%M:%S")
+            }
+
+        form = RunForm(initial=initial)
     
-    return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
-    
+    s = Shoe.objects.filter(user=user,active=True)        
+    form.fields['shoe'].queryset = s
+
+    return render_to_response('run/run_edit.html', 
+        {'form' : form},
+        context_instance=RequestContext(request))
+
 def run_remove(request, username, run_id):
     if not is_authorized(request, username): 
         return redirect_to_login(request)
@@ -1051,8 +1002,7 @@ def run_remove(request, username, run_id):
     messages.success(request, "Deleted run.")
 
     return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
-    
-    
+
 ### Shoes ###
 
 def shoe_add(request, username):

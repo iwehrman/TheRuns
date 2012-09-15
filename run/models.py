@@ -261,23 +261,6 @@ def hms_to_time(hours, minutes, seconds):
         raise Exception("Duration must not exceed 1 day")
 
     return d
-
-# @receiver(post_save, sender=Run)
-# def update_on_run_save(sender, **kwargs):
-#     """
-#     Automagically update the UserProfile.last_shoe and Shoe.miles properties. 
-#     """
-#     run = kwargs['instance']
-#     created = kwargs['created']
-#     shoe = run.shoe
-#     if shoe and created:
-#         print "Updating shoe miles" 
-#         shoe.miles += Decimal(run.distance)
-#         print "New miles " + str(shoe.miles)
-#         profile = run.user.get_profile()
-#         profile.last_shoe = shoe
-#         shoe.save()
-#         profile.save()
         
 @receiver(pre_delete, sender=Run)
 def update_on_run_delete(sender, **kwargs):
@@ -287,9 +270,7 @@ def update_on_run_delete(sender, **kwargs):
     run = kwargs['instance']
     shoe = run.shoe
     if shoe:
-        print "Deleting shoe miles" 
         shoe.miles -= Decimal(run.distance)
-        print "New miles " + str(shoe.miles)
         shoe.save()
 
 @receiver(pre_delete, sender=Shoe)

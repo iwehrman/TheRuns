@@ -2,7 +2,7 @@ import datetime, logging, json
 
 from django.contrib.auth.models import User
 from django.forms import *
-from run.models import UserProfile, Run, hms_to_time
+from run.models import UserProfile, Run, Shoe, hms_to_time
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +130,76 @@ def obj_to_run(obj):
         run.calories = int(obj[_calories])
     return run
 
+
+class RunForm(ModelForm): 
+
+    date_month = IntegerField(min_value=1, max_value=12)
+    date_day = IntegerField(min_value=1, max_value=31)
+    date_year = IntegerField(min_value=1900)
+
+    duration_hours = IntegerField(min_value=0, required=False)
+    duration_minutes = IntegerField(min_value=0, required=False)
+    duration_seconds = IntegerField(min_value=0, required=False)
+
+    def clean_distance(self): 
+        distance = self.cleaned_data['distance']
+        if distance <= 0: 
+            raise ValidationError("Distance must be greater than 0 miles.")
+        else:
+            return distance
+
+    def clean_average_heart_rate(self): 
+        hr = self.cleaned_data['average_heart_rate']
+        if hr <= 0: 
+            raise ValidationError("Heart rate must be greater than 0 or left blank. ")
+        else:
+            return distance
+
+    def clean(self): 
+        cleaned_data = super(RunForm, self).clean()
+
+        if {'date_month', 'date_day', 'date_year'} <= set(cleaned_data.keys()):
+            month = cleaned_data['date_month']
+            day = cleaned_data['date_day']
+            year = cleaned_data['date_year']
+
+            try:
+                cleaned_data['date'] = datetime.date(year, month, day)
+            except: 
+                self._errors['date'] = self.error_class(["Invalid date: %s/%s/%s" % (month,day,year)])
+
+        if {'duration_hours', 'duration_minutes', 'duration_seconds'} <= set(cleaned_data.keys()):
+
+            if cleaned_data['duration_hours']:
+                hours = cleaned_data['duration_hours']
+            else:
+                hours = 0
+
+            if cleaned_data['duration_minutes']:
+                minutes = cleaned_data['duration_minutes']
+            else: 
+                minutes = 0
+
+            if cleaned_data['duration_seconds']:
+                seconds = cleaned_data['duration_seconds']
+            else:
+                seconds = 0
+
+            try:
+                duration = hms_to_time(hours, minutes, seconds)
+            except: 
+                self._errors['duration'] = self.error_class(["Invalid duration: %s:%s:%s" % (hours,minutes,seconds)])
+
+            if duration > datetime.time(0,0,0,0): 
+                cleaned_data['duration'] = duration
+            else: 
+                self._errors['duration'] = self.error_class(["Run must have non-zero duration."])
+
+        return cleaned_data
+
+    class Meta: 
+        model = Run
+        
 class ImportForm(Form):
     
     class ImportableFileField(FileField):

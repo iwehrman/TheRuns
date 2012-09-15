@@ -153,12 +153,16 @@ class RunForm(ModelForm):
         if hr <= 0: 
             raise ValidationError("Heart rate must be greater than 0 or left blank. ")
         else:
-            return distance
+            return hr
 
     def clean(self): 
         cleaned_data = super(RunForm, self).clean()
 
-        if {'date_month', 'date_day', 'date_year'} <= set(cleaned_data.keys()):
+        # if {'date_month', 'date_day', 'date_year'} <= set(cleaned_data.keys()):
+        if (('date_month' in cleaned_data) and 
+            ('date_day' in cleaned_data) and 
+            ('date_year' in cleaned_data)): 
+
             month = cleaned_data['date_month']
             day = cleaned_data['date_day']
             year = cleaned_data['date_year']
@@ -168,7 +172,10 @@ class RunForm(ModelForm):
             except: 
                 self._errors['date'] = self.error_class(["Invalid date: %s/%s/%s" % (month,day,year)])
 
-        if {'duration_hours', 'duration_minutes', 'duration_seconds'} <= set(cleaned_data.keys()):
+        # if {'duration_hours', 'duration_minutes', 'duration_seconds'} <= set(cleaned_data.keys()):
+        if (('duration_hours' in cleaned_data) and 
+            ('duration_minutes' in cleaned_data) and 
+            ('duration_seconds' in cleaned_data)):
 
             if cleaned_data['duration_hours']:
                 hours = cleaned_data['duration_hours']

@@ -959,7 +959,8 @@ def run_add(request, username):
                 profile.save()
                 
             log.info('Added run for %s: %s', user, form.instance)
-            messages.success(request, "Added run " + str(form.instance) + ".")
+            messages.success(request, "Added a %s-mile run on %s" % 
+                (run.distance, datetime.datetime.strftime(run.date, "%m/%d/%Y")))
 
             pace = hms_to_time(0,0,run.duration_in_seconds() / run.distance)
             fast_mile = hms_to_time(0,5,0)

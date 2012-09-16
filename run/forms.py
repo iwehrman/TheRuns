@@ -150,11 +150,15 @@ class RunForm(ModelForm):
             return distance
 
     def clean_average_heart_rate(self): 
-        hr = self.cleaned_data['average_heart_rate']
-        if hr <= 0: 
-            raise ValidationError("Heart rate must be greater than 0 or left blank. ")
-        else:
-            return hr
+        if 'average_heart_rate' in self.cleaned_data and self.cleaned_data['average_heart_rate']: 
+            hr = self.cleaned_data['average_heart_rate']
+            log.debug("hr: %s" % hr)
+            if hr <= Decimal('0'): 
+                raise ValidationError("Heart rate must be greater than 0 or left blank. ")
+            else:
+                return hr
+        else: 
+            return None
 
     def clean(self): 
         cleaned_data = super(RunForm, self).clean()

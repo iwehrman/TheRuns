@@ -733,7 +733,7 @@ def password_reset_start(request):
                
                 return HttpResponseRedirect(reverse('run.views.password_reset_finish'))
             except Exception as e: 
-                messages.error(request, "Unable to send email to: %s", to_addr)
+                messages.error(request, "Unable to send email to: %s.", to_addr)
                 log.error(e)
                 return render_to_response('run/reset_start.html', context, 
                     context_instance=RequestContext(request))
@@ -807,7 +807,7 @@ def do_signup(request):
             login(request, user)
             reset_last_modified(user)
             
-            messages.success(request, 'Your account has been created! Next, update the rest of your profile information below.')
+            messages.success(request, 'Account created! Next, update the rest of your profile information below.')
             log.info("Created account for %s (%s)", user, user.email)
             return HttpResponseRedirect(reverse('run.views.userprofile_update', args=[user.username]))
     else: 
@@ -959,7 +959,7 @@ def run_add(request, username):
                 profile.save()
                 
             log.info('Added run for %s: %s', user, form.instance)
-            messages.success(request, "Added a %s-mile run on %s" % 
+            messages.success(request, "Added a %s-mile run on %s." % 
                 (run.distance, datetime.datetime.strftime(run.date, "%m/%d/%Y")))
 
             pace = hms_to_time(0,0,run.duration_in_seconds() / run.distance)
@@ -1020,7 +1020,7 @@ def shoe_add(request, username):
 
             shoe = form.instance
             log.info('Added shoe for %s: %s', user, shoe)
-            messages.success(request, "Shoe added: %s" % shoe)
+            messages.success(request, "Shoe added: %s." % shoe)
             return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
 
     else:

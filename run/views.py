@@ -960,6 +960,11 @@ def run_add(request, username):
                 
             log.info('Added run for %s: %s', user, form.instance)
             messages.success(request, "Added run " + str(form.instance) + ".")
+
+            pace = hms_to_time(0,0,run.duration_in_seconds() / run.distance)
+            fast_mile = hms_to_time(0,5,0)
+            if pace < fast_mile: 
+                messages.warning(request, "Wow, a %s mile! Are you sure you didn't cheat?" % pace)
             
             return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
     else: 

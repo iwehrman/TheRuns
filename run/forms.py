@@ -1,4 +1,5 @@
 import datetime, logging, json
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.forms import *
@@ -214,12 +215,12 @@ class ShoeForm(ModelForm):
     def clean_miles(self): 
         if 'miles' in self.cleaned_data and self.cleaned_data['miles']: 
             miles = self.cleaned_data['miles']
-            if miles < 0.0: 
+            if miles < Decimal('0'): 
                 raise ValidationError("Miles must be non-negative, or blank.")
             else:
                 return miles
         else:
-            return 0.0
+            return Decimal('0')
 
     class Meta: 
         model = Shoe

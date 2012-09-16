@@ -18,31 +18,38 @@
 	<fieldset>
 	<legend>Add a new shoe </legend>
 
-	<div class="clearfix">
+	<div class="clearfix{% if form.make.errors %} error{% endif %}">
 		<label for="id_make">Make</label>
 		<div class="input">
-			<input type="text" name="make" id="id_make" class="large" tabindex="1" placeholder="Adidas">
+			<input type="text" name="make" id="id_make" class="large" tabindex="1" 
+				placeholder="Nike"{% if form.make.value %} value="{{form.make.value}}"{% endif %}>
+			{{ form.make.errors }}
 	    </div>	
 	</div>
 
-	<div class="clearfix">
+	<div class="clearfix{% if form.model.errors %} error{% endif %}">
 		<label for="id_model">Model</label>
 		<div class="input">
-			<input type="text" name="model" id="id_model" class="large" tabindex="2" placeholder="Response Cushion 19">
-		</div>
+			<input type="text" name="model" id="id_model" class="large" tabindex="2" 
+				placeholder="Free Run+ 3 (Yellow)"{% if form.model.value %} value="{{form.model.value}}"{% endif %}>
+			{{ form.model.errors }}
+	    </div>	
 	</div>
 
-	<div class="clearfix">
-		<label for="id_miles">Current Mileage</label>
+	<div class="clearfix{% if form.miles.errors %} error{% endif %}">
+		<label for="id_miles">Current mileage</label>
 		<div class="input">
-			<input type="text" name="miles" id="id_miles" class="mini" tabindex="3" value="0">
-		</div>
+			<input type="text" name="miles" id="id_miles" class="mini" tabindex="3" 
+				placeholder="0"{% if form.miles.value %} value="{{form.miles.value}}"{% endif %}>
+			{{ form.miles.errors }}
+	    </div>	
 	</div>
 
 	<div class="clearfix">
 		<div class="input">
 			{% csrf_token %}
-			<input type="hidden" name="user" value="{{ user.id }}" />
+			<input type="hidden" name="user" value="{{user.id}}" />
+			<input type="hidden" name="active" value="{{form.active.value}}" />
 			<input type="submit" class="btn primary" value="Add Shoe" tabindex="4"/>
 		</div>
 	</div>

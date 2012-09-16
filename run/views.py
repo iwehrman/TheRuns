@@ -21,7 +21,7 @@ from django_recaptcha_field import create_form_subclass_with_recaptcha
 from recaptcha import RecaptchaClient
 
 from run.models import UserProfile, Shoe, Run, hms_to_time, Aggregate
-from run.forms import RunForm, UserForm, NewUserForm, UserProfileForm, ImportForm
+from run.forms import RunForm, ShoeForm, UserForm, NewUserForm, UserProfileForm, ImportForm
 
 BASE_URI = "http://get.theruns.in"
 MAIL_FROM_ADDR = "admin@theruns.in"
@@ -962,12 +962,8 @@ def run_add(request, username):
             messages.success(request, "Added run " + str(form.instance) + ".")
             
             return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
-        else: 
-            log.debug("invalid form", form.errors)
-
     else: 
         p = user.get_profile()
-        
 
         today = datetime.datetime.today()
         initial={'user' : request.user.id, 
@@ -1010,28 +1006,25 @@ def shoe_add(request, username):
         return redirect_to_login(request)
 
     user = request.user
-    if request.method == 'POST': 
-        post = request.POST
-        shoe = Shoe()
-        shoe.user = user
-        shoe.make = post['make']
-        shoe.model = post['model']
-        try:
-            shoe.miles = int(post['miles'])
-        except ValueError:
-            messages.error(request, "Bad mileage.")
-            return render_to_response('run/shoe_edit.html', 
-                context_instance=RequestContext(request))
-        shoe.active = True
-        shoe.save()
-        reset_last_modified(user)
+    if request.method == 'POST':
+        form = ShoeForm(request.POST)
+        if form.is_valid(): 
+            form.save()
+            reset_last_modified(user)
 
-        log.info('Added shoe for %s: %s', user, shoe)
-        messages.success(request, "Shoe added.")
-        return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
+            shoe = form.instance
+            log.info('Added shoe for %s: %s', user, shoe)
+            messages.success(request, "Shoe added: %s" % shoe)
+            return HttpResponseRedirect(reverse('run.views.userprofile', args=[user.username]))
+
     else:
-        return render_to_response('run/shoe_edit.html', 
-            context_instance=RequestContext(request))
+        initial={'user' : user.id, 
+            'active' : True}
+        form = ShoeForm(initial=initial)
+
+    return render_to_response('run/shoe_edit.html', 
+        {'form' : form},
+        context_instance=RequestContext(request))
 
 def shoe_all(request, username):
     if not is_authorized(request, username):

@@ -21,7 +21,7 @@ class Shoe(models.Model):
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return self.make + " " + self.model + " (" + str(self.miles) + ")"
+        return "%s %s (%d mi)" % (self.make, self.model, self.miles)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)

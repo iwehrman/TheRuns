@@ -206,6 +206,23 @@ class RunForm(ModelForm):
 
     class Meta: 
         model = Run
+
+class ShoeForm(ModelForm): 
+
+    miles = DecimalField(max_digits=5, decimal_places=2, required=False)
+
+    def clean_miles(self): 
+        if 'miles' in self.cleaned_data and self.cleaned_data['miles']: 
+            miles = self.cleaned_data['miles']
+            if miles < 0.0: 
+                raise ValidationError("Miles must be non-negative, or blank.")
+            else:
+                return miles
+        else:
+            return 0.0
+
+    class Meta: 
+        model = Shoe
         
 class ImportForm(Form):
     

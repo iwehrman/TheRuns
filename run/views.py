@@ -818,6 +818,39 @@ def do_signup(request):
         context,
         context_instance=RequestContext(request))
 
+# def _email_new_user(user): 
+#     to_addr = user.email
+#     recipient_list = [to_addr]
+#     subject = 'Welcome to The Runs!'
+#     short_url = reverse('run.views.index_user', args=[user.username])
+#     short_uri = BASE_URI + short_url
+
+#     body = ('Howdy %s, \n\nWelcome to The Runs! ' +
+#         'Log your runs on your personalized page here: %s \n\n' + 
+#         'If you keep track of how far you run and for how long, you\'ll see lots of pretty graphs that show your progress. ' + 
+#         'And your progress can be measured even more accurately if you use a heart-rate monitor, but that isn\'t necessary to get started. ' +
+#         'Now go get some runs in!\n' % (user.first_name, short_uri))
+    
+#     try:
+#         send_mail(subject, body, MAIL_FROM_ADDR, recipient_list)
+#     except Exception as e: 
+#         log.error(e)
+
+def do_sitemap(request): 
+    users = User.objects.filter(is_active=True)
+    def user_to_url(user): 
+        short_url = reverse('run.views.index_user', args=[user.username])
+        return BASE_URI + short_url
+
+    pages = map(user_to_url, users)
+    pages.append(BASE_URI + reverse('run.views.index'))
+    pages.append(BASE_URI + reverse('run.views.do_login'))
+    pages.append(BASE_URI + reverse('run.views.do_signup'))
+    pages.append(BASE_URI + reverse('run.views.do_splash'))
+    
+    return HttpResponse(content='\n'.join(pages), 
+        content_type='text/plain; charset=utf-8')
+
 ### UserProfile ###
 
 @cache_control(must_revalidate=True)

@@ -451,8 +451,10 @@ def history_user(request, username):
     sameuser = (request.user == user)
     
     start = datetime.datetime.now()
-    first = date_of_first_run(user)
     today = date.today()
+    first = date_of_first_run(user)
+    if first is None: 
+        first = today
     
     if 'today' in request.GET: 
         try: 
